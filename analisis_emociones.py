@@ -116,7 +116,6 @@ with FaceLandmarker.create_from_options(options) as landmarker:
         
         break
       
-      #plot_face_blendshapes_bar_graph(face_landmarker_result.face_blendshapes[0])
 
 
 
@@ -126,7 +125,10 @@ cv2.destroyAllWindows()
 
 
 
-def graficar_emocion(emocion):
+fig1 = plt.figure("Filtro")
+fig1.subplots_adjust(hspace=2, wspace=2)
+
+def graficar_emocion(emocion, index):
     caracteristicas = emocion.face_blendshapes[0]
 
     nombreCaracteristicas = [caracteristica.category_name for caracteristica in caracteristicas]
@@ -134,26 +136,33 @@ def graficar_emocion(emocion):
 
     rangos = range(len(nombreCaracteristicas))
 
-    fig, ax = plt.subplots(figsize=(1,1))
-    bar = ax.barh(rangos, calificacionCaracteristicas, label = [str(x) for x in rangos])
+    ax = fig1.add_subplot(index)
+    bar = ax.barh(rangos, calificacionCaracteristicas, label=[str(x) for x in rangos])
+
     ax.set_yticks(rangos, nombreCaracteristicas)
     ax.invert_yaxis()
+    
+    ax.set_axis_off()
 
     #etiquetar cada barra
-    for score, patch in zip(calificacionCaracteristicas, bar.patches):
-        plt.text(patch.get_x() +  patch.get_width(), patch.get_y(), f"{score: .4f}", va = "top")
+    #for score, patch in zip(calificacionCaracteristicas, bar.patches):
+    #    plt.text(patch.get_x() +  patch.get_width(), patch.get_y(), f"{score: .4f}", va = "top")
 
-    ax.set_label("Calificacion")
-    ax.set_title("Caracteristicas Rostro")
-    plt.tight_layout()
-    ax = fig1.add_subplot(2, 2, i)
-
-plt.show()
-
+    #ax.set_label("Calificacion")
+    #ax.set_title("Caracteristicas Rostro")
+    #plt.tight_layout()
+    
+    
 
 
-for i in emociones:
+
+
+
+for i, emoticon in enumerate(emociones):
   try:
-    graficar_emocion(i)
+    graficar_emocion(emoticon, i)
   except:
     pass
+
+ 
+plt.show()
