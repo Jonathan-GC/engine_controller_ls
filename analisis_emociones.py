@@ -3,79 +3,25 @@ from mediapipe.framework.formats import landmark_pb2
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-def draw_landmarks_on_image(rgb_image, detection_result):
-  face_landmarks_list = detection_result.face_landmarks
-  
-  annotated_image = np.copy(rgb_image)
 
-  # Loop through the detected faces to visualize.
-  for idx in range(len(face_landmarks_list)):
-    face_landmarks = face_landmarks_list[idx]
-
-    # Draw the face landmarks.
-    face_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
-    face_landmarks_proto.landmark.extend([
-      landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y, z=landmark.z) for landmark in face_landmarks
-    ])
-
-    solutions.drawing_utils.draw_landmarks(
-        image=annotated_image,
-        landmark_list=face_landmarks_proto,
-        connections=mp.solutions.face_mesh.FACEMESH_TESSELATION,
-        landmark_drawing_spec=None,
-        connection_drawing_spec=mp.solutions.drawing_styles
-        .get_default_face_mesh_tesselation_style())
-    solutions.drawing_utils.draw_landmarks(
-        image=annotated_image,
-        landmark_list=face_landmarks_proto,
-        connections=mp.solutions.face_mesh.FACEMESH_CONTOURS,
-        landmark_drawing_spec=None,
-        connection_drawing_spec=mp.solutions.drawing_styles
-        .get_default_face_mesh_contours_style())
-    solutions.drawing_utils.draw_landmarks(
-        image=annotated_image,
-        landmark_list=face_landmarks_proto,
-        connections=mp.solutions.face_mesh.FACEMESH_IRISES,
-          landmark_drawing_spec=None,
-          connection_drawing_spec=mp.solutions.drawing_styles
-          .get_default_face_mesh_iris_connections_style())
-
-  return annotated_image
-
-def plot_face_blendshapes_bar_graph(face_blendshapes):
-  
-  # Extract the face blendshapes category names and scores.
-  face_blendshapes_names = [face_blendshapes_category.category_name for face_blendshapes_category in face_blendshapes]
-  face_blendshapes_scores = [face_blendshapes_category.score for face_blendshapes_category in face_blendshapes]
-  # The blendshapes are ordered in decreasing score value.
-  face_blendshapes_ranks = range(len(face_blendshapes_names))
-
-  fig, ax = plt.subplots(figsize=(12, 12))
-  bar = ax.barh(face_blendshapes_ranks, face_blendshapes_scores, label=[str(x) for x in face_blendshapes_ranks])
-  ax.set_yticks(face_blendshapes_ranks, face_blendshapes_names)
-  ax.invert_yaxis()
-
-  # Label each bar with values
-  for score, patch in zip(face_blendshapes_scores, bar.patches):
-    plt.text(patch.get_x() + patch.get_width(), patch.get_y(), f"{score:.4f}", va="top")
-
-  ax.set_xlabel('Score')
-  ax.set_title("Face Blendshapes")
-  plt.tight_layout()
-  plt.show()
 
 
 import cv2
 import mediapipe as mp
 from mediapipe.tasks.python import vision
 
+#Elecccion de la libreria necesxarias para el entrenamiento
 BaseOptions = mp.tasks.BaseOptions
 FaceLandmarker = mp.tasks.vision.FaceLandmarker
 FaceLandmarkerOptions = mp.tasks.vision.FaceLandmarkerOptions
 VisionRunningMode = mp.tasks.vision.RunningMode
 
+
+#Aqui se van a almacenar cada una de las emociones que se transmiten en los frames
 emociones = list()
 
+
+#Opciones del analizador de rotro para video
 options = FaceLandmarkerOptions(
   base_options = BaseOptions(model_asset_path="modelos/face_landmarker.task"),
   running_mode = VisionRunningMode.VIDEO,
@@ -83,34 +29,47 @@ options = FaceLandmarkerOptions(
   num_faces=1
 )
 
+
+#Fuente de alimentacion, captura de fps, para poder conseguir el triempo de analisis de los frames
 cap = cv2.VideoCapture("sources/video3.mp4")
 fps = cv2.CAP_PROP_FPS
 timeNow = 0
+
+
+#Hilo de arranque para el reconocedor de imagen
 with FaceLandmarker.create_from_options(options) as landmarker:
 
   while(1):
+
+    #Lectura
     ret, imagen = cap.read()
 
+    #Salida rapida en caso de error
     if not ret:
       break
     else:
       
-      
+      #Transformo la imagen a RGB ya que es una exigencia de la libreria
       imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2RGB)
-      imagen = cv2.resize(imagen, (0,0), fx=0.4, fy=0.4)
-      cv2.imshow("imagen1", imagen)
 
+      #La reescalo para evitar demoras en el proceso aunque no es necesario pero prefiero tener optimos resultados
+      imagen = cv2.resize(imagen, (0,0), fx=0.4, fy=0.4)
+      
+      #Muestro la imagen original pero aun la convierto a BGR
+      cv2.imshow("imagen Original", imagen)
+
+      #Vectorizacion de la imagen con el modelo para el analisis dew las caracteristicas del rostro
       mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=imagen)
+      
+      #Calculo el tiempo ya que va a ser importante para el tiempo del detector, este hasta el momento me da resultados optimos y no traba el proceso como el faceMesh
       timeNow
       face_landmarker_result = landmarker.detect_for_video(mp_image, timeNow)
       timeNow += 1000//fps
 
+
+      #Las emociones detectadas la añado a lista de emociones para se posteriormente ser almacenadas como entrenamiento
       emociones.append(face_landmarker_result)
-      
-      #annotated_image = draw_landmarks_on_image(imagen, face_landmarker_result)
-      
         
-      #cv2.imshow("imagen2", annotated_image)
 
       if (cv2.waitKey(1) == 27):
         
@@ -125,17 +84,24 @@ cv2.destroyAllWindows()
 
 
 
+#Funcion para plotear las emociones en subplots
 fig1 = plt.figure("Filtro")
 fig1.subplots_adjust(hspace=2, wspace=2)
 
+
+
+# Funcion de graficación
 def graficar_emocion(emocion, index):
+
+    #obtencion de caracteristicas
     caracteristicas = emocion.face_blendshapes[0]
 
+    #Captura de las variables principales
     nombreCaracteristicas = [caracteristica.category_name for caracteristica in caracteristicas]
     calificacionCaracteristicas = [calificacion.score for calificacion in caracteristicas] 
-
     rangos = range(len(nombreCaracteristicas))
 
+    #Inicio del plot
     ax = fig1.add_subplot(index)
     bar = ax.barh(rangos, calificacionCaracteristicas, label=[str(x) for x in rangos])
 
@@ -158,6 +124,7 @@ def graficar_emocion(emocion, index):
 
 
 
+#Pasar el ploteo para cada emocion
 for i, emoticon in enumerate(emociones):
   try:
     graficar_emocion(emoticon, i)
@@ -165,4 +132,5 @@ for i, emoticon in enumerate(emociones):
     pass
 
  
+#Mostrar los resultados
 plt.show()
