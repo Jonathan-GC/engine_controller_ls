@@ -31,7 +31,7 @@ options = FaceLandmarkerOptions(
 
 
 #Fuente de alimentacion, captura de fps, para poder conseguir el triempo de analisis de los frames
-cap = cv2.VideoCapture("sources/video3.mp4")
+cap = cv2.VideoCapture("sources/emocionesVideo1.mp4")
 fps = cv2.CAP_PROP_FPS
 timeNow = 0
 
