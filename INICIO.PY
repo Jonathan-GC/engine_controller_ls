@@ -8,8 +8,8 @@ cuerpos_mp = mp.solutions.pose
 manos_mp = mp.solutions.hands
 rostro_mp = mp.solutions.face_mesh
 
-#captura = cv2.VideoCapture(0)
-captura = cv2.VideoCapture('sources/video6.mp4')
+captura = cv2.VideoCapture(0)
+#captura = cv2.VideoCapture('sources/video6.mp4')
 
 
 resultados = {"manos": None, "cuerpo": None, "rostro": None}
@@ -96,4 +96,5 @@ rostro_mp.FaceMesh(
 
 captura.release()
 cv2.destroyAllWindows()
+
 
