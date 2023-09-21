@@ -8,8 +8,6 @@ from mediapipe.framework.formats import landmark_pb2
 captura = cv2.VideoCapture('sources/video3.mp4')
 
 
-
-
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
@@ -27,6 +25,7 @@ options = vision.FaceLandmarkerOptions(running_mode=3,
                                        result_callback=analizarRostro)
 
 with vision.FaceLandmarker.create_from_options(options) as detector:
+    
     #introducir los callBack del mouse
     cv2.namedWindow('Imagen')
     while(captura.isOpened()):
