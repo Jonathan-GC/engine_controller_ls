@@ -10,7 +10,7 @@ rostro_mp = mp.solutions.face_mesh
 
 
 #captura = cv2.VideoCapture(0)
-captura = cv2.VideoCapture('sources/video6.mp4')
+captura = cv2.VideoCapture('sources/video5.mp4')
 
 
 resultados = {"manos": None, "cuerpo": None, "rostro": None}
