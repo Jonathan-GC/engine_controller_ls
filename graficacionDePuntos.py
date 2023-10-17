@@ -1,7 +1,10 @@
+import pandas as pd
 import cv2
 import numpy as np
 import mediapipe as mp
 from mediapipe.framework.formats import landmark_pb2
+import plotly.express as px
+
 
 dibujo_mp = mp.solutions.drawing_utils
 cuerpos_mp = mp.solutions.pose
@@ -162,9 +165,62 @@ cv2.destroyAllWindows()
 
 puntos = cuerpoResult.pose_landmarks.landmark
 
-print(type(puntos))
+#print(type(puntos))
 
 #Imprimir todos los puntos
-print ([i for i in puntos])
+datos = [i for i in puntos]
+
+ejeX = [i.x for i in datos]
+ejeY = [i.y for i in datos]
+ejeZ = [i.z for i in datos]
+
+ejeX = np.asarray(ejeX)
+ejeY = np.asarray(ejeY)
+ejeZ = np.asarray(ejeZ)
+parte_Cuerpo = [
+    "NOSE"	,
+"LEFT_EYE_INNER"	,
+ "LEFT_EYE"	,
+ "LEFT_EYE_OUTER"	,
+ "RIGHT_EYE_INNER"	,
+ "RIGHT_EYE"	,
+  "RIGHT_EYE_OUTER"	,
+ "LEFT_EAR"	,
+  "RIGHT_EAR"	,
+  "MOUTH_LEFT"	,
+  "MOUTH_RIGHT"	,
+  "LEFT_SHOULDER"	,
+  "RIGHT_SHOULDER"	,
+  "LEFT_ELBOW"	,
+  "RIGHT_ELBOW"	,
+  "LEFT_WRIST"	,
+  "RIGHT_WRIST"	,
+  "LEFT_PINKY" 	,
+  "RIGHT_PINKY"	,
+  "LEFT_INDEX"	,
+  "RIGHT_INDEX"	,
+  "LEFT_THUMB"	,
+  "RIGHT_THUMB"	,
+  "LEFT_HIP"	,
+  "RIGHT_HIP"	,
+  "LEFT_KNEE"	,
+  "RIGHT_KNEE"	,
+  "LEFT_ANKLE" 	,
+  "RIGHT_ANKLE"	,
+  "LEFT_HEEL"	,
+  "RIGHT_HEEL"	,
+  "LEFT_FOOT_INDEX"	,
+  "RIGHT_FOOT_INDEX"
+]
+#print(ejeX)
+#print(ejeY)
+#print(ejeZ)
 
 
+puntos_df = pd.DataFrame({"X": ejeX, "Y": ejeY, "Z": ejeZ, "Puntos": parte_Cuerpo})
+
+print(puntos_df)
+
+
+fig = px.scatter_3d(puntos_df, x='X', y='Y', z='Z', color=parte_Cuerpo)
+fig.show()
