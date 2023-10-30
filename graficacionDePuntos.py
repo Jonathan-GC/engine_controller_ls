@@ -5,6 +5,8 @@ import mediapipe as mp
 from mediapipe.framework.formats import landmark_pb2
 import plotly.express as px
 
+import time as t
+
 
 dibujo_mp = mp.solutions.drawing_utils
 cuerpos_mp = mp.solutions.pose
@@ -12,10 +14,57 @@ manos_mp = mp.solutions.hands
 rostro_mp = mp.solutions.face_mesh
 
 
+# ****************************************************
+#                   Variables de Data
+# ****************************************************
+
+puntos = None
+puntos_df = pd.DataFrame(columns= ["X", "Y", "Z", "Puntos", "fotograma"])
+parte_Cuerpo = [
+    "NOSE"	,
+"LEFT_EYE_INNER"	,
+ "LEFT_EYE"	,
+ "LEFT_EYE_OUTER"	,
+ "RIGHT_EYE_INNER"	,
+ "RIGHT_EYE"	,
+  "RIGHT_EYE_OUTER"	,
+ "LEFT_EAR"	,
+  "RIGHT_EAR"	,
+  "MOUTH_LEFT"	,
+  "MOUTH_RIGHT"	,
+  "LEFT_SHOULDER"	,
+  "RIGHT_SHOULDER"	,
+  "LEFT_ELBOW"	,
+  "RIGHT_ELBOW"	,
+  "LEFT_WRIST"	,
+  "RIGHT_WRIST"	,
+  "LEFT_PINKY" 	,
+  "RIGHT_PINKY"	,
+  "LEFT_INDEX"	,
+  "RIGHT_INDEX"	,
+  "LEFT_THUMB"	,
+  "RIGHT_THUMB"	,
+  "LEFT_HIP"	,
+  "RIGHT_HIP"	,
+  "LEFT_KNEE"	,
+  "RIGHT_KNEE"	,
+  "LEFT_ANKLE" 	,
+  "RIGHT_ANKLE"	,
+  "LEFT_HEEL"	,
+  "RIGHT_HEEL"	,
+  "LEFT_FOOT_INDEX"	,
+  "RIGHT_FOOT_INDEX"
+]
+
+
+#*********************************************************
+
+
 #captura = cv2.VideoCapture(0)
 
-captura = cv2.VideoCapture('sources/emocionesVideo1.mp4')
-
+captura = cv2.VideoCapture('sources/feliz_3.mp4')
+#captura = cv2.VideoCapture('sources/emocionesVideo1.mp4')
+#captura = cv2.VideoCapture('sources/video6.mp4')
 
 resultados = {"manos": None, "cuerpo": None, "rostro": None}
 
@@ -55,6 +104,8 @@ def seleccionar_area(event, x, y, flags, param):
 
 
 
+
+contador = 0
 
 with cuerpos_mp.Pose(model_complexity=1, min_tracking_confidence=0.7 ) as cuerpo, \
 manos_mp.Hands(
@@ -146,10 +197,37 @@ rostro_mp.FaceMesh(
             #print(cuerpoResult.pose_landmarks)
             #print(cuerpoResult.pose_world_landmarks)
             
+            try:
+                contador += 1
+                
+                puntos = cuerpoResult.pose_landmarks.landmark
+                #Imprimir todos los puntos
+                datos = [i for i in puntos]
 
+                ejeX = [i.x for i in datos]
+                ejeY = [i.y for i in datos]
+                ejeZ = [i.z for i in datos]
+
+                ejeX = np.asarray(ejeX)
+                ejeY = np.asarray(ejeY)
+                ejeZ = np.asarray(ejeZ)
+
+                puntos_df_temp = pd.DataFrame({"X": ejeX, "Y": ejeY, "Z": ejeZ, "Puntos": parte_Cuerpo, "fotograma": contador})
+
+                #print(puntos_df_temp)
+                puntos_df = pd.concat([puntos_df, puntos_df_temp], ignore_index=True)
+                
+            except:
+                pass
+
+            #cv2.putText(image, 'OpenCV', org, font,  
+            #       fontScale, color, thickness, cv2.LINE_AA) 
+            
+            imagen = cv2.putText(imagen,str(contador), (50,50),cv2.FONT_HERSHEY_SIMPLEX ,1,(0,0,255), 2, cv2.LINE_AA)
             cv2.imshow("Imagen", imagen+imagen2)
             cv2.imshow("imagen1", imagen_area_interes)
             cv2.imshow("Gestualizacion", ju)
+
 
 
 
@@ -163,64 +241,75 @@ cv2.destroyAllWindows()
 #    print(punto)
 
 
-puntos = cuerpoResult.pose_landmarks.landmark
+#puntos = cuerpoResult.pose_landmarks.landmark
 
 #print(type(puntos))
 
 #Imprimir todos los puntos
-datos = [i for i in puntos]
+#datos = [i for i in puntos]
 
-ejeX = [i.x for i in datos]
-ejeY = [i.y for i in datos]
-ejeZ = [i.z for i in datos]
+#ejeX = [i.x for i in datos]
+#ejeY = [i.y for i in datos]
+#ejeZ = [i.z for i in datos]
 
-ejeX = np.asarray(ejeX)
-ejeY = np.asarray(ejeY)
-ejeZ = np.asarray(ejeZ)
-parte_Cuerpo = [
-    "NOSE"	,
-"LEFT_EYE_INNER"	,
- "LEFT_EYE"	,
- "LEFT_EYE_OUTER"	,
- "RIGHT_EYE_INNER"	,
- "RIGHT_EYE"	,
-  "RIGHT_EYE_OUTER"	,
- "LEFT_EAR"	,
-  "RIGHT_EAR"	,
-  "MOUTH_LEFT"	,
-  "MOUTH_RIGHT"	,
-  "LEFT_SHOULDER"	,
-  "RIGHT_SHOULDER"	,
-  "LEFT_ELBOW"	,
-  "RIGHT_ELBOW"	,
-  "LEFT_WRIST"	,
-  "RIGHT_WRIST"	,
-  "LEFT_PINKY" 	,
-  "RIGHT_PINKY"	,
-  "LEFT_INDEX"	,
-  "RIGHT_INDEX"	,
-  "LEFT_THUMB"	,
-  "RIGHT_THUMB"	,
-  "LEFT_HIP"	,
-  "RIGHT_HIP"	,
-  "LEFT_KNEE"	,
-  "RIGHT_KNEE"	,
-  "LEFT_ANKLE" 	,
-  "RIGHT_ANKLE"	,
-  "LEFT_HEEL"	,
-  "RIGHT_HEEL"	,
-  "LEFT_FOOT_INDEX"	,
-  "RIGHT_FOOT_INDEX"
-]
+#ejeX = np.asarray(ejeX)
+#ejeY = np.asarray(ejeY)
+#ejeZ = np.asarray(ejeZ)
+
 #print(ejeX)
 #print(ejeY)
 #print(ejeZ)
-
-
-puntos_df = pd.DataFrame({"X": ejeX, "Y": ejeY, "Z": ejeZ, "Puntos": parte_Cuerpo})
+#puntos_df = pd.DataFrame({"X": ejeX, "Y": ejeY, "Z": ejeZ, "Puntos": parte_Cuerpo})
 
 print(puntos_df)
 
+puntos_df.to_excel("datos/dataEmociones.xlsx")
+#puntos_df.to_excel("datos/dataVideo6.xlsx")
 
-fig = px.scatter_3d(puntos_df, x='X', y='Y', z='Z', color=parte_Cuerpo)
-fig.show()
+#fig = px.scatter_3d(puntos_df, x='X', y='Y', z='Z', color=parte_Cuerpo)
+#fig.show()
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+# Crear una figura 3D
+fig = plt.figure(figsize=(8, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+# Crear un mapeo de colores
+cmap = plt.get_cmap('tab20b')  # Puedes cambiar 'tab10' por otro mapa de colores
+colors = [cmap(i) for i in range(len(puntos_df['Puntos'].unique()))]
+
+
+# Asignar un color diferente a cada categoría
+colormap = {}
+for i, category in enumerate(puntos_df['Puntos'].unique()):
+    colormap[category] = colors[i]
+
+# Plotear los puntos con colores diferentes
+for category in puntos_df['Puntos'].unique():
+    subset = puntos_df[puntos_df['Puntos'] == category]
+    ax.scatter(subset['X'], subset['Y'], subset['Z'], label=category, color=colormap[category], alpha=0.7)
+
+
+
+# Plotear los puntos
+ax.scatter(puntos_df['X'], puntos_df['Y'], puntos_df['Z'])
+
+# Etiquetar cada punto
+#for i, txt in enumerate(puntos_df['Puntos']):
+#    ax.text(puntos_df['X'][i], puntos_df['Y'][i], puntos_df['Z'][i], txt)
+
+
+# Configurar etiquetas
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+
+
+# Mostrar leyenda
+ax.legend()
+
+
+# Mostrar el gráfico
+plt.show()
