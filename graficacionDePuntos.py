@@ -62,8 +62,10 @@ parte_Cuerpo = [
 
 #captura = cv2.VideoCapture(0)
 
-captura = cv2.VideoCapture('sources/feliz_3.mp4')
 #captura = cv2.VideoCapture('sources/emocionesVideo1.mp4')
+#captura = cv2.VideoCapture('sources/feliz-2.mp4')
+captura = cv2.VideoCapture('sources/feliz_3.mp4')
+
 #captura = cv2.VideoCapture('sources/video6.mp4')
 
 resultados = {"manos": None, "cuerpo": None, "rostro": None}
@@ -200,7 +202,8 @@ rostro_mp.FaceMesh(
             try:
                 contador += 1
                 
-                puntos = cuerpoResult.pose_landmarks.landmark
+                #puntos = cuerpoResult.pose_landmarks.landmark
+                puntos = cuerpoResult.pose_world_landmarks.landmark
                 #Imprimir todos los puntos
                 datos = [i for i in puntos]
 
