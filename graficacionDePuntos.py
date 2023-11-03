@@ -63,6 +63,7 @@ parte_Cuerpo = [
 #captura = cv2.VideoCapture(0)
 
 #captura = cv2.VideoCapture('sources/emocionesVideo1.mp4')
+
 #captura = cv2.VideoCapture('sources/feliz-2.mp4')
 captura = cv2.VideoCapture('sources/feliz_3.mp4')
 
