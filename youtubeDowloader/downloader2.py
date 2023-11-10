@@ -39,6 +39,6 @@ def Download(link, palabra):
 
 
 link = input("Introcuzca la url: ")
-carpeta = input("Introcuzca la palabra clave")
+carpeta = input("Introcuzca la palabra clave: ")
 Download(link, carpeta)
 
