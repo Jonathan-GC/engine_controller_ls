@@ -4,7 +4,8 @@ import easyocr
 import threading
 
 reader = easyocr.Reader(["es"], gpu=False)
-captura = cv2.VideoCapture("../sources/Dictionary/personas/2.mp4")
+#captura = cv2.VideoCapture("../sources/Dictionary/personas/2.mp4")
+captura = cv2.VideoCapture("sources/Dictionary/personas/2.mp4")
 
 
 def analisiText(img):
