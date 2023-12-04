@@ -19,8 +19,6 @@ def item_selected(event):
     """
     Evento invocado cuando el contenido de una carpeta es abierto.
     """
-    global last_task  
-    
     item_seleccionado = arbol.selection()
     item = arbol.item(item_seleccionado)
     
