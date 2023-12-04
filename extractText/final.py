@@ -13,8 +13,8 @@ from funciones.reproductor import iniciar_video, visualizar
 #----------------------------------------------------
 
     
-#Funcion Global para seleccionar el objeto y ponerlo en la vista general
-#De Video
+#Funcion Global para seleccionar el objeto y ponerlo en 
+# la vista general De Video
 def item_selected(event):
     """
     Evento invocado cuando el contenido de una carpeta es abierto.
@@ -99,13 +99,6 @@ cuadro_visualizador.config(bg="purple", width=520, height=580)
 lblVideo = Label(cuadro_visualizador)
 lblVideo.pack()
 
-
-
-
-
-
-#Correr la ventana Principal
-#frame_root.mainloop()
 
 
 if __name__ == "__main__":
