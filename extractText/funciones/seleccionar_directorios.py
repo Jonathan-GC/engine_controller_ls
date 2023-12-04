@@ -1,3 +1,4 @@
+from optparse import Values
 import tkinter as tk
 from tkinter import filedialog
 import os
@@ -10,22 +11,26 @@ from os.path import isdir, join, abspath
 # su correspondiente archivo o carpeta.
 #fsobjects = {}
 
-
+global Ruta_seleccionada
 
 
 def abrir_directorio(PunteroArbol=None):
+
+    #Seleccionar el directorio y permitir solamente Video del tipo mp4 y avi
     directorio_abierto = filedialog.askdirectory()
 
+    #Captura de la ruta del archivo
     if directorio_abierto != "":
         os.chdir(directorio_abierto)
+        #Cargar la ruta y llamar a la funcion para listar los directorios
         load_tree(PunteroArbol, os.getcwd())
 
     else:
         return None
 
 def listardir(path):
+    #Listar los directorios pertenecientes a la ruta de carpeta seleccionada
     try:
-        #print(listdir(path))
         return listdir(path)
     except PermissionError:
         print("No tienes suficientes permisos para acceder a",
@@ -43,10 +48,12 @@ def load_tree(PunteroArbol=None, path="", parent=""):
     
     for fsobj in listdir(path):
         fullpath = join(path, fsobj)
-        child = insert_item(fsobj, fullpath, parent, PunteroArbol)
-        if isdir(fullpath):
-            for sub_fsobj in listdir(fullpath):
-                insert_item(sub_fsobj, join(fullpath, sub_fsobj), child, PunteroArbol)
+        #buscar si es mp4 o avi
+        if fullpath.endswith(".mp4") or fullpath.endswith(".avi"):
+            child = insert_item(fsobj, fullpath, parent, PunteroArbol)
+            if isdir(fullpath):
+                for sub_fsobj in listdir(fullpath):
+                    insert_item(sub_fsobj, join(fullpath, sub_fsobj), child, PunteroArbol)
 
 def insert_item(name, path, parent="", PunteroArbol=None,):
             """
@@ -54,7 +61,12 @@ def insert_item(name, path, parent="", PunteroArbol=None,):
             del ítem.
             """
             #iid = PunteroArbol.insert(parent, tk.END, text=name, tags=("fstag",), image=get_icon(path))
-            iid = PunteroArbol.insert(parent, tk.END, text=name, tags=("video",))
+            
+            #Remplazar los "\" por el "/" reconocido de python
+            path = path.replace("\\", "/")
+
+            #Insertar los valores
+            iid = PunteroArbol.insert(parent, tk.END, text=name, tags=("video",), values=(path))
             #self.fsobjects[iid] = path
             return iid
 
