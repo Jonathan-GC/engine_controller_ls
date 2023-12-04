@@ -39,8 +39,13 @@ class Visualizador_Video:
             if captura is not None:
                 ret, imagen = captura.read()
                 if ret == True:
+                    #r = 750 / imagen.shape[1]
+                    #dim = (750, int(imagen.shape[0] * r))
+
+                    #imagen = cv2.resize(imagen, dim, interpolation=cv2.INTER_AREA)
+
                     # 1. Redimensionar al tamaño del GUI
-                    imagen = imutils.resize(imagen, width=750)
+                    imagen = imutils.resize(imagen, height=500)
                     # 2. Colorear en RGB, ya que originalmente viene en BGR
                     imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2RGB)
                     # 3. Convertir en Imagen

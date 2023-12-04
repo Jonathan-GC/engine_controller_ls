@@ -57,7 +57,7 @@ Tree_in.config(bg="lightblue", width=250, height=900)
 #from funciones.seleccionar_directorios import item_selected
 arbol = ttk.Treeview(Tree_in)
 arbol.bind("<<TreeviewSelect>>", item_selected)
-arbol.pack()
+arbol.pack(expand=True, fill='both')
 
 
 
@@ -92,17 +92,58 @@ button_dir_out.grid(row=0, column=1, padx = 10, pady = 10)
 #----------------------------------------------------
 #
 #           1. Reproductor : Visualizador
+#
 #----------------------------------------------------
 cuadro_visualizador = Frame(cuadro_reproductor)
-cuadro_visualizador.grid(row=0, column = 0)
-cuadro_visualizador.config(bg="purple", width=520, height=580) 
+cuadro_visualizador.grid(row=0, column = 0, sticky="nsew")
+cuadro_visualizador.config(bg="purple", height=480) 
 
-lblVideo = Label(cuadro_visualizador)
-lblVideo.pack()
+#----------------------------------------------------
+#           1.2. Visualizador : Video Principal
+#----------------------------------------------------
+lblVideoPrincipal = Label(cuadro_visualizador)
+lblVideoPrincipal.grid(row=0, column=0, columnspan=2, rowspan=3, sticky='nsew')
 
-Visualizador_General = Visualizador_Video(lblVideo)
+# Instanciamiento Objeto visualizador
+Visualizador_General = Visualizador_Video(lblVideoPrincipal)
+
+#----------------------------------------------------
+#           1.2. Visualizador : Roi_Personaje
+#----------------------------------------------------
+roi_personaje = Frame(cuadro_visualizador)
+roi_personaje.grid(row=0, column=2)
+roi_personaje.config(bg="yellow", width=250, height=125) 
+
+
+#----------------------------------------------------
+#           1.3. Visualizador : Roi_Text
+#----------------------------------------------------
+roi_text = Frame(cuadro_visualizador)
+roi_text.grid(row=1, column=2)
+roi_text.config(bg="black", width=250, height=125) 
+
+
+#----------------------------------------------------
+#   1.4. Visualizador : Visualizer Puntos Corporales
+#----------------------------------------------------
+roi_body_puntos = Frame(cuadro_visualizador)
+roi_body_puntos.grid(row=3, column=2)
+roi_body_puntos.config(bg="blue", width=250, height=125) 
+
+#----------------------------------------------------
+#                   Reproductor
+#----------------------------------------------------
+#
+#           2. Reproductor : CONTROLES
+#
+#----------------------------------------------------
+cuadro_controles = Frame(cuadro_reproductor)
+cuadro_controles.grid(row=1, column = 0, sticky='nsew')
+cuadro_controles.config(bg="white", width=750, height=250)
+
+lanzador = Button(cuadro_controles, text="ROI")
+lanzador.pack()
 
 if __name__ == "__main__":
-
     #visualizar(lblVideo)
     frame_root.mainloop()
