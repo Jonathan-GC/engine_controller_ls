@@ -2,8 +2,8 @@
 from tkinter import *
 from tkinter import ttk
 
-from funciones.reproductor import iniciar_video, visualizar
-
+#from funciones.reproductor import iniciar_video, visualizar
+from funciones.reproductor import Visualizador_Video
 
 #----------------------------------------------------
 #               Hiperparametros
@@ -26,7 +26,8 @@ def item_selected(event):
     ruta = item["values"][0]
     
     #Iniciacion del video
-    iniciar_video(ruta, lblVideo)
+    Visualizador_General.iniciar_video(ruta)
+    #iniciar_video(ruta, lblVideo)
 
     
 
@@ -99,7 +100,7 @@ cuadro_visualizador.config(bg="purple", width=520, height=580)
 lblVideo = Label(cuadro_visualizador)
 lblVideo.pack()
 
-
+Visualizador_General = Visualizador_Video(lblVideo)
 
 if __name__ == "__main__":
 
