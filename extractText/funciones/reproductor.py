@@ -20,8 +20,12 @@ class Visualizador_Video:
     mostrar_ventana = False
     
 
-    def __init__(self, etiquetaVideo) -> None:
+    def __init__(self, etiquetaVideo, etiquetaRoiPersonaje, etiquetaRoiText, etiquetaBodyPoints ) -> None:
         self.etiquetaVideo = etiquetaVideo
+        self.etiquetaRoiPersonaje = etiquetaRoiPersonaje
+        self.etiquetaRoiText = etiquetaRoiText
+        self.etiquetaBodyPoints = etiquetaBodyPoints
+
         #self.motrar_roi()
         
 
@@ -53,7 +57,13 @@ class Visualizador_Video:
                     self.imagen_general=imagen
 
                     if self.mostrar_ventana:
+                        # si el roi esta seleccionado dibujelo
+                        if self.estado  > 1:
+                            cv2.rectangle(self.imagen_general, self.p1, self.p2, (255, 0, 0), 10)
+                        
                         cv2.imshow("Imagen", self.imagen_general)
+
+
                     else:
                         cv2.destroyAllWindows()
 
@@ -81,31 +91,33 @@ class Visualizador_Video:
     def seleccionar_area(self, event, x, y, flags, param):
         # Ejemplos de acciones con algunos eventos del mouse
         if event == cv2.EVENT_LBUTTONDBLCLK:
-            cv2.putText(self.imagen_general, "Seleccionar", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 2, cv2.LINE_AA)
+            #cv2.putText(self.imagen_general, "Seleccionar", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 2, cv2.LINE_AA)
+            
             #Seleccionar primer punto
             if self.estado == 0:
                 self.p1 = (x, y)
-                self.estado += 1
+                self.estado = 1
             #selecionar segundo punto
             elif self.estado == 1:
                 self.p2 = (x, y)
-                self.estado += 1
+                self.estado = 2
 
         if event == cv2.EVENT_RBUTTONUP:
-            
             self.p1, self.p2 = None, None
             self.estado = 0
 
+        if flags == cv2.EVENT_FLAG_ALTKEY:
+            print("JODER")
+
     def motrar_roi(self):
-        print("Joder")
+        
         #Activar la ventana de opencv
         self.mostrar_ventana = True
-        cv2.namedWindow('Imagen')
-        
+        cv2.namedWindow('Imagen')  
         #introducir los callBack del mouse
         cv2.setMouseCallback("Imagen", self.seleccionar_area)
-        #self.quitar_ventana()
-        print("Joder2")
+        
+        
         
         
 

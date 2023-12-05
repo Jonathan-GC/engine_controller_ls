@@ -106,8 +106,6 @@ cuadro_visualizador.config(bg="purple", height=480)
 lblVideoPrincipal = Label(cuadro_visualizador)
 lblVideoPrincipal.grid(row=0, column=0, columnspan=2, rowspan=3, sticky='nsew')
 
-# Instanciamiento Objeto visualizador
-Visualizador_General = Visualizador_Video(lblVideoPrincipal)
 
 #----------------------------------------------------
 #           1.2. Visualizador : Roi_Personaje
@@ -115,6 +113,9 @@ Visualizador_General = Visualizador_Video(lblVideoPrincipal)
 roi_personaje = Frame(cuadro_visualizador)
 roi_personaje.grid(row=0, column=2)
 roi_personaje.config(bg="yellow", width=250, height=125) 
+
+lbl_roi_personaje = Label(roi_personaje)
+lbl_roi_personaje.pack()
 
 
 #----------------------------------------------------
@@ -124,6 +125,8 @@ roi_text = Frame(cuadro_visualizador)
 roi_text.grid(row=1, column=2)
 roi_text.config(bg="black", width=250, height=125) 
 
+lbl_roi_text = Label(roi_text)
+lbl_roi_text.pack()
 
 #----------------------------------------------------
 #   1.4. Visualizador : Visualizer Puntos Corporales
@@ -132,6 +135,13 @@ roi_body_puntos = Frame(cuadro_visualizador)
 roi_body_puntos.grid(row=3, column=2)
 roi_body_puntos.config(bg="blue", width=250, height=125) 
 
+
+lbl_roi_body_puntos = Label(roi_body_puntos)
+lbl_roi_body_puntos.pack()
+
+
+# Instanciamiento Objeto visualizador
+Visualizador_General = Visualizador_Video(lblVideoPrincipal, lbl_roi_personaje, lbl_roi_text, lbl_roi_body_puntos )
 #----------------------------------------------------
 #                   Reproductor
 #----------------------------------------------------
