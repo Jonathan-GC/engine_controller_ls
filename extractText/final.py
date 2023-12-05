@@ -9,7 +9,7 @@ from funciones.reproductor import Visualizador_Video
 #               Hiperparametros
 #----------------------------------------------------
 
-
+RUTA = "sources/emocionesVideo1.mp4"
 #----------------------------------------------------
 
     
@@ -25,6 +25,8 @@ def item_selected(event):
     #Extraer la ruta del archivo
     ruta = item["values"][0]
     
+    global RUTA
+    RUTA = ruta
     #Iniciacion del video
     Visualizador_General.iniciar_video(ruta)
     #iniciar_video(ruta, lblVideo)
@@ -141,9 +143,14 @@ cuadro_controles = Frame(cuadro_reproductor)
 cuadro_controles.grid(row=1, column = 0, sticky='nsew')
 cuadro_controles.config(bg="white", width=750, height=250)
 
-lanzador = Button(cuadro_controles, text="ROI")
+
+
+lanzador = Button(cuadro_controles, text="ROI", command= Visualizador_General.motrar_roi)
 lanzador.pack()
+Cerrador = Button(cuadro_controles, text="X", command=Visualizador_General.quitar_ventana)
+Cerrador.pack()
+
 
 if __name__ == "__main__":
-    #visualizar(lblVideo)
+    
     frame_root.mainloop()
