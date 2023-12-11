@@ -11,25 +11,29 @@ class Visualizador_Video:
     # Esta variable permite almacenar la ultima tarea 
     # y terminar los procesos he hilos de ejecución
     last_task = None
+
     #Roi Definido por dos puntos
     p1, p2 = None, None # Roi Persona
+
+    list_puntos_difuminar = []
     p3, p4 = None, None # Roi Texto
     
     estado = 0
     estado1 = 0
     dimensiones = (480, 640)
     imagen_general = np.zeros(dimensiones, np.uint8)
+    imagen_respaldo = np.zeros(dimensiones, np.uint8)
 
     mostrar_ventana = False
     
+    #Bandera para los eventos cuando se presiona la tecla 'ALT'
+    bandera_ALT = 0
 
     def __init__(self, etiquetaVideo, etiquetaRoiPersonaje, etiquetaRoiText, etiquetaBodyPoints ) -> None:
         self.etiquetaVideo = etiquetaVideo
         self.etiquetaRoiPersonaje = etiquetaRoiPersonaje
         self.etiquetaRoiText = etiquetaRoiText
         self.etiquetaBodyPoints = etiquetaBodyPoints
-
-        #self.motrar_roi()
         
 
 
@@ -57,12 +61,13 @@ class Visualizador_Video:
                 if ret == True:
                     #Extraer las dimensiones y colocarlas en el tablero general
                     self.dimensiones = imagen.shape
-                    self.imagen_general=imagen
+                    self.imagen_general=imagen.copy()
+                    self.imagen_respaldo=imagen.copy()
 
                     if self.mostrar_ventana:
                         # si el roi esta seleccionado dibujelo
-                        if self.estado  > 1 and self.estado < 3:
-                            cv2.rectangle(self.imagen_general, self.p1, self.p2, (255, 0, 0), 5)
+                        if self.estado  > 1:
+                            cv2.rectangle(self.imagen_general, self.p1, self.p2, (255, 0, 0), 2)
                             imagen_persona = self.imagen_general[int(self.p1[1]) : int(self.p2[1]), int(self.p1[0]) : int(self.p2[0])]
                             imagen_persona = imutils.resize(imagen_persona, height=250)
                             imagen_persona = cv2.cvtColor(imagen_persona, cv2.COLOR_BGR2RGB)
@@ -70,7 +75,15 @@ class Visualizador_Video:
                             img_persona = ImageTk.PhotoImage(image=im_persona)
                             self.etiquetaRoiPersonaje.configure(image=img_persona)
                             self.etiquetaRoiPersonaje.image = img_persona
-                        if self.estado  > 2 and self.estado < 5:
+                        
+                        for puntos in self.list_puntos_difuminar:
+                            cv2.rectangle(self.imagen_general, puntos[0], puntos[1], (0, 255, 0), 2)
+                            area_for_borrar = self.imagen_general[puntos[0][1]: puntos[1][1], puntos[0][0]: puntos[1][0]]
+                            # Borrar area con un kernel de (31, 31)
+                            area_for_borrar = cv2.blur(area_for_borrar, (31,31), cv2.BORDER_DEFAULT)
+                            imagen[puntos[0][1]: puntos[1][1], puntos[0][0]: puntos[1][0]] = area_for_borrar
+
+                            """
                             cv2.rectangle(self.imagen_general, self.p3, self.p4, (0, 255, 0), 5)
                             imagen_texto = self.imagen_general[int(self.p3[1]) : int(self.p4[1]), int(self.p3[0]) : int(self.p4[0])]
                             imagen_texto = imutils.resize(imagen_texto, height=250)
@@ -79,6 +92,7 @@ class Visualizador_Video:
                             img_texto = ImageTk.PhotoImage(image=im_texto)
                             self.etiquetaRoiText.configure(image=img_texto)
                             self.etiquetaRoiText.image = img_texto
+                            """
                         cv2.imshow("Imagen", self.imagen_general)
 
 
@@ -105,26 +119,30 @@ class Visualizador_Video:
         except:
             pass    
 
-    #Llamada a eventos del mouse
+    # Llamada a eventos del mouse
     def seleccionar_area(self, event, x, y, flags, param):
-        # Ejemplos de acciones con algunos eventos del mouse
-               
+
+        if flags == cv2.EVENT_FLAG_ALTKEY:
+            self.bandera_ALT = 1
+        
+        # Ejemplos de acciones con algunos eventos del mouse   
         if event == cv2.EVENT_LBUTTONDBLCLK:
-            #cv2.putText(self.imagen_general, "Seleccionar", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 2, cv2.LINE_AA) 
             
-            if  flags == cv2.EVENT_FLAG_ALTKEY and  self.estado1 == 0:
-                print("JOder1")
+            if  self.bandera_ALT and  self.estado1 == 0:
                 self.p3 = (x, y)
                 self.estado1 = 1
-            elif flags == cv2.EVENT_FLAG_ALTKEY and self.estado1 == 1:
-                print("JOder2")
+            
+            elif self.bandera_ALT and self.estado1 == 1:
                 self.p4 = (x, y)
-                self.estado1 = 2
+                self.list_puntos_difuminar.append([self.p3, self.p4])
+                self.estado1 = 0
+                self.bandera_ALT = 0
             
             #Seleccionar primer punto
             elif self.estado == 0:
                 self.p1 = (x, y)
                 self.estado = 1
+            
             #selecionar segundo punto
             elif self.estado == 1:
                 self.p2 = (x, y)
@@ -132,20 +150,30 @@ class Visualizador_Video:
             
 
 
-        if event == cv2.EVENT_RBUTTONUP:
+        if self.bandera_ALT and event == cv2.EVENT_RBUTTONUP:
+            self.p3, self.p4 = None, None
+            self.list_puntos_difuminar = []
+
+            # Llamado a la limpieza de la imagen
+            self.limpiarImagen()
+
+        elif event == cv2.EVENT_RBUTTONUP:
             self.p1, self.p2 = None, None
             self.estado = 0
-        elif flags == cv2.EVENT_FLAG_ALTKEY and event == cv2.EVENT_RBUTTONUP:
-            self.p3, self.p4 = None, None
+            
             
 
     def motrar_roi(self):
-        
-        #Activar la ventana de opencv
+        # Activar la ventana de opencv
         self.mostrar_ventana = True
         cv2.namedWindow('Imagen')  
-        #introducir los callBack del mouse
+        
+        # Introducir los callBack del mouse
         cv2.setMouseCallback("Imagen", self.seleccionar_area)
+
+    def limpiarImagen(self):
+        self.imagen_general = self.imagen_respaldo
+
         
         
         
