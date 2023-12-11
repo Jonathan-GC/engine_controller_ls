@@ -5,6 +5,17 @@ import cv2
 import numpy as np
 import imutils
 
+import easyocr
+import threading
+
+#lector en español
+reader = easyocr.Reader(["es"], gpu=False)
+
+def analisiText(img):
+    result = reader.readtext(img, paragraph=False)
+    #return result
+    print (result)
+    #return result
 
 class Visualizador_Video:
 
@@ -94,6 +105,8 @@ class Visualizador_Video:
                             self.etiquetaRoiText.image = img_texto
                             """
                         cv2.imshow("Imagen", self.imagen_general)
+                        analisiText(imagen)
+                        
 
 
                     else:
@@ -183,10 +196,6 @@ class Visualizador_Video:
         self.mostrar_ventana = False
     
     
-
-
-        
-
         
 
 class visualizadorOpenCV:
