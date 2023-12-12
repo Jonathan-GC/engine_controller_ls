@@ -11,11 +11,7 @@ import threading
 #lector en español
 reader = easyocr.Reader(["es"], gpu = True)
 
-def analisiText(img):
-    result = reader.readtext(img, paragraph=False)
-    #return result
-    print (result)
-    #return result
+
 
 class Visualizador_Video:
 
@@ -39,6 +35,11 @@ class Visualizador_Video:
     
     #Bandera para los eventos cuando se presiona la tecla 'ALT'
     bandera_ALT = 0
+
+    # Fotograma de Inicio y Fin
+    Senias_encontradas = []
+    palabraAnterior = None
+    contador = 0
 
     def __init__(self, etiquetaVideo, etiquetaRoiPersonaje, etiquetaRoiText, etiquetaBodyPoints ) -> None:
         self.etiquetaVideo = etiquetaVideo
@@ -105,7 +106,14 @@ class Visualizador_Video:
                             self.etiquetaRoiText.image = img_texto
                             """
                         cv2.imshow("Imagen", self.imagen_general)
-                        analisiText(imagen)
+                        
+                        palabra = self.analisiText(imagen):
+                        
+                        if palabra:
+                            fotograma_inicio = self.contador
+                            
+                            self.Senias_encontradas.append()
+
                         
 
 
@@ -194,6 +202,20 @@ class Visualizador_Video:
 
     def quitar_ventana(self):
         self.mostrar_ventana = False
+
+    def analisiText(self, img, frame_inicio, frame_fin):
+        try:
+            # Ralizacion del analisis de texto sobre imagen
+            result = reader.readtext(img, paragraph=False)
+
+            # If encuentra algo con una certeza mayor del 60%
+            if(result[0][1] > 0.6):
+                # Retorne el numero del fotograma y la palabra
+                return result[0][1]
+                
+        #return result
+        except:
+            return None
     
     
         
