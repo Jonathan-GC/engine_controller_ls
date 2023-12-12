@@ -9,7 +9,7 @@ import easyocr
 import threading
 
 #lector en español
-reader = easyocr.Reader(["es"], gpu=False)
+reader = easyocr.Reader(["es"], gpu = True)
 
 def analisiText(img):
     result = reader.readtext(img, paragraph=False)
