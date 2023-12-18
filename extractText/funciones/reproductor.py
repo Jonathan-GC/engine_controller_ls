@@ -107,13 +107,15 @@ class Visualizador_Video:
                             """
                         cv2.imshow("Imagen", self.imagen_general)
                         
-                        palabra = self.analisiText(imagen):
+                        palabra = self.analisiText(imagen)
+                        print(palabra)
                         
+                        """
                         if palabra:
                             fotograma_inicio = self.contador
                             
                             self.Senias_encontradas.append()
-
+                        """
                         
 
 
@@ -215,7 +217,7 @@ class Visualizador_Video:
                 
         #return result
         except:
-            return None
+            return ""
     
     
         
