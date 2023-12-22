@@ -4,7 +4,7 @@ from tkinter import *
 from tkinter import ttk
 
 import tkinter
-from turtle import left, window_width
+from turtle import left, width, window_width
 from idlelib.tooltip import Hovertip
 from torch import fill #para la informacion de los botones
 from ttkwidgets import CheckboxTreeview
@@ -183,9 +183,83 @@ button_procesar_con_voz.pack(padx=10, side='left', anchor='center', expand=False
 #
 #----------------------------------------------------
 frame_control_de_video = Frame(frame_herrsamientas_de_video)
-frame_control_de_video.config(bg="pink", height=180)
+frame_control_de_video.config(bg="white", height=180)
 frame_control_de_video.pack(fill='x', anchor= 's')
 
+#----------------------------------------------------
+#
+#            1.2.1 Control de posicion
+#
+#----------------------------------------------------
+frame_control_de_posicion = Frame(frame_control_de_video)
+frame_control_de_posicion.config(bg="white")
+frame_control_de_posicion.pack(fill='x', anchor= 'n', padx=20)
+
+#------------------------------------|
+#     1.2.2  Frame insert inicio
+# -----------------------------------|
+frame_inicio = Frame(frame_control_de_posicion)
+frame_inicio.config(bg="white", width=104)
+frame_inicio.pack(side='left')
+
+label_inicio = Label(frame_inicio, text="Fotograma Inicio",bg="white").pack()
+inBox_inicio = Entry(frame_inicio).pack()
+
+#------------------------------------|
+#      1.2.3    Frame Actual
+# -----------------------------------|
+frame_actual = Frame(frame_control_de_posicion)
+frame_actual.config(bg="white", width=104)
+frame_actual.pack(side='left')
+
+label_actual = Label(frame_actual, text="Fotograma Actual", bg="white").pack()
+inBox_Actual = Entry(frame_actual, state='disabled').pack()
+
+#------------------------------------|
+#    1.2.4   Frame insert Fin
+# -----------------------------------|
+frame_fin = Frame(frame_control_de_posicion)
+frame_fin.config(bg="white", width=104)
+frame_fin.pack(side='left')
+
+label_fin = Label(frame_fin, text="Fotograma Fin",bg="white").pack()
+inBox_fin = Entry(frame_fin).pack()
+
+#------------------------------------|
+#       Boton Guardar Video
+# -----------------------------------|
+boton_guardar_video = Button(frame_control_de_posicion, text="Guardar")
+boton_guardar_video.pack(side='left', padx=20, expand=True)
+
+#----------------------------------------------------
+#
+#            1.3. Visores Post-Procesados
+#
+#----------------------------------------------------
+frame_visores_Post_Procesados = Frame(frame_control_de_video)
+frame_visores_Post_Procesados.config(bg="green")
+frame_visores_Post_Procesados.pack(fill='x', anchor= 'n', padx=20, expand=1)
+
+#------------------------------------|
+#    1.3.1   visor mediapipe
+# -----------------------------------|
+frame_visor_mediaPipe = Frame(frame_visores_Post_Procesados)
+frame_visor_mediaPipe.config(bg="pink", width=178, height=123)
+frame_visor_mediaPipe.pack(anchor= 'n', padx=10, side='left')
+
+#------------------------------------|
+#    1.3.2   visor preview
+# -----------------------------------|
+frame_visor_preview = Frame(frame_visores_Post_Procesados)
+frame_visor_preview.config(bg="blue", width=178, height=123)
+frame_visor_preview.pack(anchor= 'n', padx=10, side='left')
+
+#------------------------------------|
+#    1.3.2   visor propiedades
+# -----------------------------------|
+frame_visor_preview = Frame(frame_visores_Post_Procesados)
+frame_visor_preview.config(bg="brown", width=178, height=123)
+frame_visor_preview.pack(anchor= 'n', padx=10, side='left')
 
 if __name__ == "__main__":
     
