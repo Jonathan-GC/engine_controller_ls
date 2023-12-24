@@ -5,9 +5,11 @@ from tkinter import ttk
 
 import tkinter
 from turtle import left, width, window_width
-from idlelib.tooltip import Hovertip
-from torch import fill #para la informacion de los botones
+from idlelib.tooltip import Hovertip #para la informacion de los botones
 from ttkwidgets import CheckboxTreeview
+#from torch import fill 
+
+from funciones.reproductor import MediaPlayer
 
 #Funcion Global para seleccionar el objeto y ponerlo en 
 # la vista general De Video
@@ -21,12 +23,9 @@ def item_selected(event):
     #Extraer la ruta del archivo
     ruta = item["values"][0]
     
-    print(ruta)
-    #global RUTA
-    #RUTA = ruta
     #Iniciacion del video
-    #Visualizador_General.iniciar_video(ruta)
-    #iniciar_video(ruta, lblVideo)
+    reproductor = MediaPlayer(ruta, frame_visualizer )
+    
 
 
 #Ventana principal
@@ -237,29 +236,62 @@ boton_guardar_video.pack(side='left', padx=20, expand=True)
 #
 #----------------------------------------------------
 frame_visores_Post_Procesados = Frame(frame_control_de_video)
-frame_visores_Post_Procesados.config(bg="green")
+frame_visores_Post_Procesados.config(bg="white")
 frame_visores_Post_Procesados.pack(fill='x', anchor= 'n', padx=20, expand=1)
 
 #------------------------------------|
 #    1.3.1   visor mediapipe
 # -----------------------------------|
 frame_visor_mediaPipe = Frame(frame_visores_Post_Procesados)
-frame_visor_mediaPipe.config(bg="pink", width=178, height=123)
+frame_visor_mediaPipe.config(bg="grey", width=178, height=123)
 frame_visor_mediaPipe.pack(anchor= 'n', padx=10, side='left')
 
 #------------------------------------|
 #    1.3.2   visor preview
 # -----------------------------------|
 frame_visor_preview = Frame(frame_visores_Post_Procesados)
-frame_visor_preview.config(bg="blue", width=178, height=123)
+frame_visor_preview.config(bg="grey", width=178, height=123)
 frame_visor_preview.pack(anchor= 'n', padx=10, side='left')
 
 #------------------------------------|
-#    1.3.2   visor propiedades
+
+#    1.3.3   visor propiedades
+
 # -----------------------------------|
-frame_visor_preview = Frame(frame_visores_Post_Procesados)
-frame_visor_preview.config(bg="brown", width=178, height=123)
-frame_visor_preview.pack(anchor= 'n', padx=10, side='left')
+frame_visor_propiedades = Frame(frame_visores_Post_Procesados)
+frame_visor_propiedades.config(bg="white", width=300, height=123)
+frame_visor_propiedades.pack(anchor= 'center', padx=1, side='left')
+
+#------------------------------------|
+#    1.3.3.1   campo nombre del Gesto
+# -----------------------------------|
+frame_campo_nombre_gesto = Frame(frame_visor_propiedades)
+frame_campo_nombre_gesto.config(bg="white", width=389, height=16)
+frame_campo_nombre_gesto.pack(anchor = 'center', padx=10, pady=5, expand=1)
+
+etiqueta_nombre_gesto = Label(frame_campo_nombre_gesto, text="Nombre de\ngesto", bg="white").pack(padx=5, side='left')
+inbox_nombre_gesto = Entry(frame_campo_nombre_gesto, state='disabled').pack(side='left')
+
+#------------------------------------|
+#    1.3.3.2   campo carpeta del Gesto
+# -----------------------------------|
+frame_campo_nombre_carpeta = Frame(frame_visor_propiedades)
+frame_campo_nombre_carpeta.config(bg="white", width=389, height=16)
+frame_campo_nombre_carpeta.pack(anchor = 'center', padx=10, pady=5, expand=1)
+
+etiqueta_nombre_carpeta = Label(frame_campo_nombre_carpeta, text="Nombre de\ncarpeta", bg="white").pack(padx=5, side='left')
+inbox_nombre_carpeta = Entry(frame_campo_nombre_carpeta, state='disabled').pack(side='left')
+
+#------------------------------------|
+#    1.3.3.3  campo nombre del Gesto
+# -----------------------------------|
+frame_campo_nombre_archivo = Frame(frame_visor_propiedades)
+frame_campo_nombre_archivo.config(bg="white", width=389, height=16)
+frame_campo_nombre_archivo.pack(anchor = 'center', padx=10, pady=5, expand=1)
+
+etiqueta_nombre_archivo = Label(frame_campo_nombre_archivo, text="Nombre de\narchivo", bg="white").pack(padx=5, side='left')
+inbox_nombre_archivo = Entry(frame_campo_nombre_archivo, state='disabled').pack(side='left')
+
 
 if __name__ == "__main__":
     

@@ -8,9 +8,13 @@ import imutils
 import easyocr
 import threading
 
+import vlc
+from datetime import timedelta
+import tkinter as tk
+import time
 #lector en español
 reader = easyocr.Reader(["es"], gpu = True)
-
+from tkinter import *
 
 
 class Visualizador_Video:
@@ -220,22 +224,68 @@ class Visualizador_Video:
             return ""
     
     
+class MediaPlayer:
+    ruta = None
+    def __init__(self, ruta, puntero_frame):
+        self.initialize_player(puntero_frame, ruta)
         
+        
+    
+    def initialize_player(self, frame, ruta):
+        self.vlc_instance = vlc.Instance()
+        self.media_player = self.vlc_instance.media_player_new()
+        #self.current_file = None
+        #self.playing_video = False
+        #self.video_paused = False
+        #self.create_widgets()
+        media = self.vlc_instance.media_new(ruta)
+        self.media_player.set_media(media)
+        self.media_player.set_hwnd(frame.winfo_id())
+        self.media_player.play()
 
-class visualizadorOpenCV:
-    def __init__(self, ruta) -> None:
-        self.ruta = ruta
-        self.iniciar_video()
 
-    def iniciar_video(self):
-        cap = cv2.VideoCapture(self.ruta)
-        ret, frame = cap.read()
-        cv2.imshow("video", frame)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
 
+class VideoProgressBar(tk.Scale):
+    def __init__(self, master, command, **kwargs):
+        kwargs["showvalue"] = False
+        super().__init__(
+            master,
+            from_=0,
+            to=100,
+            orient=tk.HORIZONTAL,
+            length=800,
+            command=command,
+            **kwargs,
+        )
+        self.bind("<Button-1>", self.on_click)
+    
+    def on_click(self, event):
+        if self.cget("state") == tk.NORMAL:
+            value = (event.x / self.winfo_width()) * 100
+            self.set(value)
 
 
 if __name__ == "__main__":
-    visualizador = visualizadorOpenCV("sources/feliz_3.mp4")
+    #app = MediaPlayer()
+    #app.update_video_progress()
+    #app.mainloop()
+
+    #Ventana principal
+    frame_root = Tk()
+
+    #Configuraciones de la ventana
+    frame_root.title("Sistema de Mineria TecnoBot")
+    frame_root.geometry("1080x720")
+    frame_root.config(bg='white')
+
+    display = Frame(frame_root, bg="black", width=800, height=400)
+    display.pack(pady=10, fill=tk.BOTH, expand=True)
+    print(display.winfo_id())
+    print(frame_root.winfo_id())
+    reproductor = MediaPlayer("sources/Martin Miller.mp4", display )
+
+    frame_root.mainloop()
+
+    
+
 

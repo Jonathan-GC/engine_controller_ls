@@ -18,32 +18,11 @@ class MediaPlayerApp(tk.Tk):
         self.playing_video = False
         self.video_paused = False
         self.create_widgets()
-
         
     def create_widgets(self):
         self.media_canvas = tk.Canvas(self, bg="black", width=800, height=400)
         self.media_canvas.pack(pady=10, fill=tk.BOTH, expand=True)
-        self.select_file_button = tk.Button(
-            self,
-            text="Select File",
-            font=("Arial", 12, "bold"),
-            command=self.select_file,
-        )
-        self.select_file_button.pack(pady=5)
-        self.time_label = tk.Label(
-            self,
-            text="00:00:00 / 00:00:00",
-            font=("Arial", 12, "bold"),
-            fg="#555555",
-            bg="#f0f0f0",
-        )
-        self.time_label.pack(pady=5)
-        self.control_buttons_frame = tk.Frame(self, bg="#f0f0f0")
-        self.control_buttons_frame.pack(pady=5)
-        
-    def create_widgets(self):
-        self.media_canvas = tk.Canvas(self, bg="black", width=800, height=400)
-        self.media_canvas.pack(pady=10, fill=tk.BOTH, expand=True)
+        print(self.media_canvas.winfo_id())
         self.select_file_button = tk.Button(
             self,
             text="Select File",
