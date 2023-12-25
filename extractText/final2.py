@@ -19,9 +19,13 @@ def item_selected(event):
     """
     item_seleccionado = arbol.selection()
     item = arbol.item(item_seleccionado)
+    print(item)
     
-    #Extraer la ruta del archivo
-    ruta = item["values"][0]
+    #Extraer la ruta del archivo y si encuentra espacios unirlos
+    ruta = ""
+    for element in item["values"]:
+        ruta += element + " "
+
     
     #Iniciacion del video
     reproductor = MediaPlayer(ruta, frame_visualizer )
