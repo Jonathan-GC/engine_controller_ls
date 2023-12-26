@@ -226,9 +226,10 @@ class Visualizador_Video:
     
 class MediaPlayer:
     ruta = None
-    def __init__(self, ruta, puntero_frame):
+    def __init__(self, ruta, puntero_frame, frame_to_scale):
         self.initialize_player(puntero_frame, ruta)
-        
+        self.progress_bar = VideoProgressBar(frame_to_scale, self.joder(), bg="#e0e0e0", highlightthickness=0)
+        self.progress_bar.pack(fill=tk.X, padx=10, pady=5)
         
     
     def initialize_player(self, frame, ruta):
@@ -239,11 +240,22 @@ class MediaPlayer:
         #self.video_paused = False
         #self.create_widgets()
         media = self.vlc_instance.media_new(ruta)
+        
         self.media_player.set_media(media)
         self.media_player.set_hwnd(frame.winfo_id())
         self.media_player.play()
+        
+        
+        print(self.media_player.get_time())
+        print(self.media_player.get_length())
 
-
+    def ClosePlayer(self):
+        self.media_player.stop()
+        self.progress_bar.destroy()
+        #self.media_player.close()
+    
+    def joder(self):
+        print("Joder Tio")
 
 class VideoProgressBar(tk.Scale):
     def __init__(self, master, command, **kwargs):
@@ -253,16 +265,19 @@ class VideoProgressBar(tk.Scale):
             from_=0,
             to=100,
             orient=tk.HORIZONTAL,
-            length=800,
-            command=command,
+            sliderlength=15,
+            cursor='dot',
             **kwargs,
         )
-        self.bind("<Button-1>", self.on_click)
+        #self.bind("<Button-1>", self.on_click)
     
     def on_click(self, event):
+        """
         if self.cget("state") == tk.NORMAL:
             value = (event.x / self.winfo_width()) * 100
             self.set(value)
+        """
+        pass
 
 
 if __name__ == "__main__":

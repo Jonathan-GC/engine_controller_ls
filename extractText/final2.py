@@ -7,9 +7,12 @@ import tkinter
 from turtle import left, width, window_width
 from idlelib.tooltip import Hovertip #para la informacion de los botones
 from ttkwidgets import CheckboxTreeview
+#from extractText.funciones import reproductor
 #from torch import fill 
 
 from funciones.reproductor import MediaPlayer
+
+reproductor_video = None
 
 #Funcion Global para seleccionar el objeto y ponerlo en 
 # la vista general De Video
@@ -28,7 +31,13 @@ def item_selected(event):
 
     
     #Iniciacion del video
-    reproductor = MediaPlayer(ruta, frame_visualizer )
+    global reproductor_video
+
+    # Cerrar el video para que no se abra en multiples ventanas
+    if reproductor_video is not None:
+        reproductor_video.ClosePlayer()
+    
+    reproductor_video = MediaPlayer(ruta, frame_visualizer, frame_botones_procesar)
     
 
 
@@ -162,8 +171,9 @@ frame_herrsamientas_de_video.config(bg="red", width= 1200, height=190)
 #
 #----------------------------------------------------
 frame_botones_procesar = Frame(frame_herrsamientas_de_video)
-frame_botones_procesar.config(bg="white")
+frame_botones_procesar.config(bg="blue")
 frame_botones_procesar.pack(fill='x', anchor='center')
+
 
 contenedorBotones = Frame(frame_botones_procesar)
 contenedorBotones.config(bg="white")
