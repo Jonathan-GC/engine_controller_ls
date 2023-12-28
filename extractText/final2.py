@@ -38,6 +38,7 @@ def item_selected(event):
         reproductor_video.ClosePlayer()
     
     reproductor_video = MediaPlayer(ruta, frame_visualizer, frame_botones_procesar)
+    reproductor_video.update_progres_video()
     
 
 

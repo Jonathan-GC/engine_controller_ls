@@ -226,9 +226,13 @@ class Visualizador_Video:
     
 class MediaPlayer:
     ruta = None
+    progress_bar = None
+
+
     def __init__(self, ruta, puntero_frame, frame_to_scale):
         self.initialize_player(puntero_frame, ruta)
-        self.progress_bar = VideoProgressBar(frame_to_scale, self.joder(), bg="#e0e0e0", highlightthickness=0)
+        self.barra_de_progreso=frame_to_scale
+        self.progress_bar = VideoProgressBar(self.barra_de_progreso, self.set_video_position, bg="#e0e0e0", highlightthickness=0)
         self.progress_bar.pack(fill=tk.X, padx=10, pady=5)
         
     
@@ -236,29 +240,89 @@ class MediaPlayer:
         self.vlc_instance = vlc.Instance()
         self.media_player = self.vlc_instance.media_player_new()
         #self.current_file = None
-        #self.playing_video = False
-        #self.video_paused = False
+        self.playing_video = False
+        self.video_paused = False
         #self.create_widgets()
         media = self.vlc_instance.media_new(ruta)
         
         self.media_player.set_media(media)
         self.media_player.set_hwnd(frame.winfo_id())
-        self.media_player.play()
+        self.play_video()
+
+
+    def play_video(self):
+        if not self.playing_video:
+            self.media_player.play()
+            self.playing_video = True  
         
         
-        print(self.media_player.get_time())
-        print(self.media_player.get_length())
+        
+    
+    def frameActual(self):
+        self.media_player.get_time()//(self.media_player.get_fps() or 1)
+    
+    def frames_totales(self):
+        try:
+            self.media_player.duration()//self.media_player.get_fps()
+        except:
+            pass
+    
+    def update_progres_video(self):
+        if self.playing_video == True:
+            fps = int(self.media_player.get_fps() or 1)
+            total_duration = self.media_player.get_length()
+            current_time = self.media_player.get_time()
+            progress_percentage = (current_time / (total_duration or 1) * 100)
+            self.progress_bar.set(progress_percentage)
+            self.actualizacion_de_barra = self.progress_bar.after(fps, self.update_progres_video)
+
+    def pause_video(self):
+        if self.playing_video == True:
+            
+            self.media_player.pause()
+            self.playing_video = False
+            """
+            if self.video_paused == True:
+                self.video_paused = False
+                self.play_video()
+            else:
+                self.media_player.pause()
+                self.video_paused = True
+            """
+
+
+
 
     def ClosePlayer(self):
+        
+        #print("FPS: ",self.media_player.get_fps())
+        #print("Time now ", self.media_player.get_time())
+        #print("Tiempo Total", self.media_player.get_length())
+        
+        # Detener el video
         self.media_player.stop()
+        self.playing_video = False
+        #Parar la barra de progreso
+        self.progress_bar.after_cancel(self.actualizacion_de_barra)
+        #Destruccion de la barra de progreso
         self.progress_bar.destroy()
-        #self.media_player.close()
+        # Destruccion del reproductor
+        self.media_player.release()
+        
+
     
-    def joder(self):
-        print("Joder Tio")
+    def set_video_position(self, value):
+        #Pausar Video
+        if self.progress_bar.is_cliked() and  self.playing_video == True:
+            total_duration = self.media_player.get_length()
+            position = int((float(value) / 100) * total_duration)
+            self.media_player.set_time(position)
+            
+        
+        
 
 class VideoProgressBar(tk.Scale):
-    def __init__(self, master, command, **kwargs):
+    def __init__(self, master,command, **kwargs):
         kwargs["showvalue"] = False
         super().__init__(
             master,
@@ -267,17 +331,33 @@ class VideoProgressBar(tk.Scale):
             orient=tk.HORIZONTAL,
             sliderlength=15,
             cursor='dot',
+            command=command,
             **kwargs,
         )
-        #self.bind("<Button-1>", self.on_click)
+        self.bind("<Button-1>", self.on_click)
+        self.clicking = False
     
     def on_click(self, event):
-        """
+        
         if self.cget("state") == tk.NORMAL:
             value = (event.x / self.winfo_width()) * 100
             self.set(value)
-        """
-        pass
+            self.clicking = True
+            
+            #Promesa de ejecucion despues de 1500 ms
+            self.after(1000, self._desactivarClicked)
+    
+    def is_cliked(self):
+        # Pregunta si esta activado el evento
+        return self.clicking
+    
+    def _desactivarClicked(self):
+        # Desactivar el evento
+        self.clicking = False
+        
+
+            
+        
 
 
 if __name__ == "__main__":
@@ -295,9 +375,15 @@ if __name__ == "__main__":
 
     display = Frame(frame_root, bg="black", width=800, height=400)
     display.pack(pady=10, fill=tk.BOTH, expand=True)
+
+    frame_to_barra = Frame(frame_root, bg="black", width=800, height=400)
+    frame_to_barra.pack(pady=2, fill='x', expand=False)
     print(display.winfo_id())
     print(frame_root.winfo_id())
-    reproductor = MediaPlayer("sources/Martin Miller.mp4", display )
+    #reproductor = MediaPlayer("sources/Martin Miller.mp4", display, frame_to_barra)
+    reproductor = MediaPlayer("sources/feliz-2.mp4", display, frame_to_barra)
+    reproductor.update_progres_video()
+    
 
     frame_root.mainloop()
 
