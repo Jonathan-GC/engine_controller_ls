@@ -1,4 +1,5 @@
 
+from turtle import left, width
 from PIL import Image
 from PIL import ImageTk
 import cv2
@@ -15,6 +16,7 @@ import time
 #lector en español
 reader = easyocr.Reader(["es"], gpu = True)
 from tkinter import *
+
 
 
 class Visualizador_Video:
@@ -232,9 +234,29 @@ class MediaPlayer:
     def __init__(self, ruta, puntero_frame, frame_to_scale):
         self.initialize_player(puntero_frame, ruta)
         self.barra_de_progreso=frame_to_scale
+        self.crear_widgets()
+
+    def crear_widgets(self):
+        self.button_play = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/pausa.png", self.funcionBandera)
+        self.button_play.pack(padx=5, side='left')
+        self.button_stop = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/stop.png", self.funcionBandera)
+        self.button_stop.pack(padx=5, side='left')
+        self.button_anterior = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/anterior.png", self.funcionBandera)
+        self.button_anterior.pack(padx=5, side='left')
+        self.button_adelante = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/adelante.png", self.funcionBandera)
+        self.button_adelante.pack(padx=5, side='left')
+        
         self.progress_bar = VideoProgressBar(self.barra_de_progreso, self.set_video_position, bg="#e0e0e0", highlightthickness=0)
         self.progress_bar.pack(fill=tk.X, padx=10, pady=5)
-        
+    
+    def eliminar_widgets(self):
+        # Destruccion de la barra de progreso y botones
+        self.progress_bar.destroy()
+        self.button_play.destroy()
+        self.button_stop.destroy()
+        self.button_anterior.destroy()
+        self.button_adelante.destroy()
+
     
     def initialize_player(self, frame, ruta):
         self.vlc_instance = vlc.Instance()
@@ -304,8 +326,8 @@ class MediaPlayer:
         self.playing_video = False
         #Parar la barra de progreso
         self.progress_bar.after_cancel(self.actualizacion_de_barra)
-        #Destruccion de la barra de progreso
-        self.progress_bar.destroy()
+        #Destruccion de la barra de progreso y botones
+        self.eliminar_widgets()
         # Destruccion del reproductor
         self.media_player.release()
         
@@ -317,6 +339,9 @@ class MediaPlayer:
             total_duration = self.media_player.get_length()
             position = int((float(value) / 100) * total_duration)
             self.media_player.set_time(position)
+    
+    def funcionBandera(self):
+        print("Nooo jodaa")
             
         
         
@@ -354,6 +379,25 @@ class VideoProgressBar(tk.Scale):
     def _desactivarClicked(self):
         # Desactivar el evento
         self.clicking = False
+
+class BotonesControl(tk.Button):
+    def __init__(self, master, icono, command, **kwargs):
+        # Importar y remuestrear a 30X30 px
+        from PIL import Image, ImageTk
+        imagen = Image.open(icono)
+        imagen = imagen.resize((30, 30))
+
+        # Conver the image in TkImage
+        self.imagen_boton = ImageTk.PhotoImage(imagen)
+        super().__init__(
+            master,
+            image=self.imagen_boton,
+            command=command,
+            **kwargs
+            )
+
+
+    
         
 
             

@@ -47,7 +47,7 @@ frame_root = Tk()
 
 #Configuraciones de la ventana
 frame_root.title("Sistema de Mineria TecnoBot")
-frame_root.geometry("1080x720")
+frame_root.geometry("1080x780")
 frame_root.config(bg='white')
 
 #Crecion de 4 raices
@@ -121,7 +121,6 @@ button_pointer.pack(padx=5, side='right')
 Hovertip(button_selec_user, text="Usar el puntero", hover_delay=500)
 
 
-
 #----------------------------------------------------
 #                 Arbol de Entrada
 #----------------------------------------------------
@@ -140,7 +139,7 @@ arbol.pack(anchor='n',fill='both')
 #Visualizador
 frame_visualizer = Frame(frame_root)
 frame_visualizer.pack(side="left", anchor='n')
-frame_visualizer.config(bg="darkblue", width=680, height=480)
+frame_visualizer.config(bg="black", width=680, height=480)
 
 
 #Arbol Salida
@@ -150,8 +149,8 @@ frame_Tree_out.config(bg="green", width=200)
 
 #Frame Fragmentos
 frame_Fragmentos = Frame(frame_root)
-frame_Fragmentos.config(bg="purple")
-frame_Fragmentos.place(x=0, y = 531, width=200, height=200)
+frame_Fragmentos.config(bg="white")
+frame_Fragmentos.place(x=0, y = 531, width=200, height=250)
 
 #----------------------------------------------------
 #               Herramientas de video
@@ -161,8 +160,8 @@ frame_Fragmentos.place(x=0, y = 531, width=200, height=200)
 #
 #----------------------------------------------------
 frame_herrsamientas_de_video = Frame(frame_root)
-frame_herrsamientas_de_video.place(x=200, y=531, width=680, height=200)
-frame_herrsamientas_de_video.config(bg="red", width= 1200, height=190)
+frame_herrsamientas_de_video.place(x=200, y=531, width=680, height=250)
+frame_herrsamientas_de_video.config(bg="white")
 #----------------------------------------------------
 #               Herramientas de video
 #----------------------------------------------------
@@ -172,7 +171,7 @@ frame_herrsamientas_de_video.config(bg="red", width= 1200, height=190)
 #
 #----------------------------------------------------
 frame_botones_procesar = Frame(frame_herrsamientas_de_video)
-frame_botones_procesar.config(bg="blue")
+frame_botones_procesar.config(bg="White")
 frame_botones_procesar.pack(fill='x', anchor='center')
 
 
@@ -197,7 +196,7 @@ button_procesar_con_voz.pack(padx=10, side='left', anchor='center', expand=False
 #
 #----------------------------------------------------
 frame_control_de_video = Frame(frame_herrsamientas_de_video)
-frame_control_de_video.config(bg="white", height=180)
+frame_control_de_video.config(bg="white", height=250)
 frame_control_de_video.pack(fill='x', anchor= 's')
 
 #----------------------------------------------------
@@ -252,7 +251,7 @@ boton_guardar_video.pack(side='left', padx=20, expand=True)
 #----------------------------------------------------
 frame_visores_Post_Procesados = Frame(frame_control_de_video)
 frame_visores_Post_Procesados.config(bg="white")
-frame_visores_Post_Procesados.pack(fill='x', anchor= 'n', padx=20, expand=1)
+frame_visores_Post_Procesados.pack(fill='both' , anchor= 'n', padx=20, expand=1)
 
 #------------------------------------|
 #    1.3.1   visor mediapipe
