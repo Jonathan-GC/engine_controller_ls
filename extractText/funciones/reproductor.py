@@ -8,6 +8,7 @@ import imutils
 
 import easyocr
 import threading
+from sympy import false
 
 import vlc
 from datetime import timedelta
@@ -229,17 +230,29 @@ class Visualizador_Video:
 class MediaPlayer:
     ruta = None
     progress_bar = None
-
+    
+    # Hiper variable de control
+    _length         =   0
+    _FPS            =   0
+    _sliding        =   False
+    _playing_video  =   False
+    _pausing_video  =   False
+    _tick_ms        =   100
+    _cont_frames    =   0
+    _frames_totales =   0 
 
     def __init__(self, ruta, puntero_frame, frame_to_scale):
         self.initialize_player(puntero_frame, ruta)
         self.barra_de_progreso=frame_to_scale
         self.crear_widgets()
 
+
     def crear_widgets(self):
-        self.button_play = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/pausa.png", self.funcionBandera)
+        self.button_play = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/play.png", self.play_video)
         self.button_play.pack(padx=5, side='left')
-        self.button_stop = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/stop.png", self.funcionBandera)
+        self.button_pausa = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/pausa.png", self.pause_video)
+        self.button_pausa.pack(padx=5, side='left')
+        self.button_stop = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/stop.png", self.stop_video)
         self.button_stop.pack(padx=5, side='left')
         self.button_anterior = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/anterior.png", self.funcionBandera)
         self.button_anterior.pack(padx=5, side='left')
@@ -249,6 +262,7 @@ class MediaPlayer:
         self.progress_bar = VideoProgressBar(self.barra_de_progreso, self.set_video_position, bg="#e0e0e0", highlightthickness=0)
         self.progress_bar.pack(fill=tk.X, padx=10, pady=5)
     
+
     def eliminar_widgets(self):
         # Destruccion de la barra de progreso y botones
         self.progress_bar.destroy()
@@ -276,12 +290,11 @@ class MediaPlayer:
         if not self.playing_video:
             self.media_player.play()
             self.playing_video = True  
-        
-        
-        
-    
+          
+
     def frameActual(self):
-        self.media_player.get_time()//(self.media_player.get_fps() or 1)
+        return self.media_player.get_time()//(self.media_player.get_fps() or 1)
+    
     
     def frames_totales(self):
         try:
@@ -289,7 +302,9 @@ class MediaPlayer:
         except:
             pass
     
+    
     def update_progres_video(self):
+        '''
         if self.playing_video == True:
             fps = int(self.media_player.get_fps() or 1)
             total_duration = self.media_player.get_length()
@@ -297,7 +312,38 @@ class MediaPlayer:
             progress_percentage = (current_time / (total_duration or 1) * 100)
             self.progress_bar.set(progress_percentage)
             self.actualizacion_de_barra = self.progress_bar.after(fps, self.update_progres_video)
+        '''
+        if self.media_player and self.playing_video:
+            barra = self.progress_bar
+            p = self.media_player
+            
+            if self._length > 0:
+                
+                if not self._sliding:                    
+                    t = max(0, p.get_time() // self._tick_ms)
+                    if t != barra.get():
+                        #barra.set(self.frameActual()+1)
+                        barra.set(t)
+                        # Actualizar etiqueta
+            else:
+                self._length = tamanio_ms = self.media_player.get_length()
+                
+                if tamanio_ms > 0:
+                    # Obtener los FPS
+                    self._FPS = fps = self.media_player.get_fps()
+                    
+                    # Obtener Frecuencia de Actualización
+                    self._tick_ms = 1000//fps
+                    
+                    # fps totales calculados de (FPS * tamanio_total_ms/1000ms)
+                    self._frames_totales = fps*tamanio_ms/1000
 
+                    
+                    barra.config(to=self._frames_totales)
+            # re-start cada fotograma
+            self.tick_f = self.progress_bar.after(int(self._tick_ms), self.update_progres_video)
+
+    
     def pause_video(self):
         if self.playing_video == True:
             
@@ -310,7 +356,16 @@ class MediaPlayer:
             else:
                 self.media_player.pause()
                 self.video_paused = True
+    
             """
+    
+    
+    def stop_video(self):
+        if self.playing_video == True:
+            self.media_player.stop()
+            self.playing_video = False
+            self.progress_bar.set(0)
+        
 
 
 
@@ -325,7 +380,7 @@ class MediaPlayer:
         self.media_player.stop()
         self.playing_video = False
         #Parar la barra de progreso
-        self.progress_bar.after_cancel(self.actualizacion_de_barra)
+        self.progress_bar.after_cancel(self.progress_bar)
         #Destruccion de la barra de progreso y botones
         self.eliminar_widgets()
         # Destruccion del reproductor
@@ -335,31 +390,55 @@ class MediaPlayer:
     
     def set_video_position(self, value):
         #Pausar Video
+        
+        '''
+        if self.playing_video and self._length :
+            # Mover el Slider por frame
+            self._sliding = True
+            #self.after_cancel(self._tick_s)
+            t = self.progress_bar.get()
+            self.funcionBandera()
+        '''
+    
         if self.progress_bar.is_cliked() and  self.playing_video == True:
-            total_duration = self.media_player.get_length()
-            position = int((float(value) / 100) * total_duration)
-            self.media_player.set_time(position)
+            self.pause_video()
+            self._sliding = False
+
+            self.progress_bar.after_cancel(self.tick_f)
+            
+            pendiente = 1000//self._FPS
+            position_ms = pendiente * self.progress_bar.get()
+            
+            print(position_ms)
+            self.media_player.set_time(int(position_ms))
+
+            self.play_video()
+            self.update_progres_video()
+
+            
+        
     
     def funcionBandera(self):
         print("Nooo jodaa")
+        self._sliding = False
             
         
         
 
 class VideoProgressBar(tk.Scale):
     def __init__(self, master,command, **kwargs):
-        kwargs["showvalue"] = False
+        #kwargs["showvalue"] = False
         super().__init__(
             master,
             from_=0,
             to=100,
             orient=tk.HORIZONTAL,
-            sliderlength=15,
+            #sliderlength=15,
             cursor='dot',
             command=command,
             **kwargs,
         )
-        self.bind("<Button-1>", self.on_click)
+        self.bind("<ButtonRelease-1>", self.on_click)
         self.clicking = False
     
     def on_click(self, event):
@@ -379,6 +458,7 @@ class VideoProgressBar(tk.Scale):
     def _desactivarClicked(self):
         # Desactivar el evento
         self.clicking = False
+    
 
 class BotonesControl(tk.Button):
     def __init__(self, master, icono, command, **kwargs):
@@ -426,6 +506,7 @@ if __name__ == "__main__":
     print(frame_root.winfo_id())
     #reproductor = MediaPlayer("sources/Martin Miller.mp4", display, frame_to_barra)
     reproductor = MediaPlayer("sources/feliz-2.mp4", display, frame_to_barra)
+    #reproductor = MediaPlayer("sources/feliz_3.mp4", display, frame_to_barra)
     reproductor.update_progres_video()
     
 
