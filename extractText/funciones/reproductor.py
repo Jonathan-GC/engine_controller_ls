@@ -267,6 +267,7 @@ class MediaPlayer:
         # Destruccion de la barra de progreso y botones
         self.progress_bar.destroy()
         self.button_play.destroy()
+        self.button_pausa.destroy()
         self.button_stop.destroy()
         self.button_anterior.destroy()
         self.button_adelante.destroy()
@@ -284,12 +285,15 @@ class MediaPlayer:
         self.media_player.set_media(media)
         self.media_player.set_hwnd(frame.winfo_id())
         self.play_video()
+        
 
 
     def play_video(self):
         if not self.playing_video:
             self.media_player.play()
-            self.playing_video = True  
+            self.playing_video = True
+            
+              
           
 
     def frameActual(self):
@@ -302,17 +306,25 @@ class MediaPlayer:
         except:
             pass
     
+    def set_video_position(self, value):
+    
+        if self.progress_bar.is_cliked() and  self.playing_video == True:
+            self.pause_video()
+            self._sliding = False
+
+            self.progress_bar.after_cancel(self.tick_f)
+            
+            pendiente = 1000//self._FPS
+            position_ms = pendiente * self.progress_bar.get()
+            
+            self.media_player.set_time(int(position_ms))
+
+            self.play_video()
+            self.update_progres_video()
+            
+
     
     def update_progres_video(self):
-        '''
-        if self.playing_video == True:
-            fps = int(self.media_player.get_fps() or 1)
-            total_duration = self.media_player.get_length()
-            current_time = self.media_player.get_time()
-            progress_percentage = (current_time / (total_duration or 1) * 100)
-            self.progress_bar.set(progress_percentage)
-            self.actualizacion_de_barra = self.progress_bar.after(fps, self.update_progres_video)
-        '''
         if self.media_player and self.playing_video:
             barra = self.progress_bar
             p = self.media_player
@@ -340,8 +352,10 @@ class MediaPlayer:
 
                     
                     barra.config(to=self._frames_totales)
+                    print("Puesta del tamaño de frames", self._frames_totales )
             # re-start cada fotograma
-            self.tick_f = self.progress_bar.after(int(self._tick_ms), self.update_progres_video)
+            #self.tick_f = self.progress_bar.after(int(self._tick_ms), self.update_progres_video)
+            self.tick_f = self.progress_bar.after(250, self.update_progres_video)
 
     
     def pause_video(self):
@@ -388,33 +402,7 @@ class MediaPlayer:
         
 
     
-    def set_video_position(self, value):
-        #Pausar Video
-        
-        '''
-        if self.playing_video and self._length :
-            # Mover el Slider por frame
-            self._sliding = True
-            #self.after_cancel(self._tick_s)
-            t = self.progress_bar.get()
-            self.funcionBandera()
-        '''
-    
-        if self.progress_bar.is_cliked() and  self.playing_video == True:
-            self.pause_video()
-            self._sliding = False
-
-            self.progress_bar.after_cancel(self.tick_f)
-            
-            pendiente = 1000//self._FPS
-            position_ms = pendiente * self.progress_bar.get()
-            
-            print(position_ms)
-            self.media_player.set_time(int(position_ms))
-
-            self.play_video()
-            self.update_progres_video()
-
+   
             
         
     
@@ -444,12 +432,18 @@ class VideoProgressBar(tk.Scale):
     def on_click(self, event):
         
         if self.cget("state") == tk.NORMAL:
-            value = (event.x / self.winfo_width()) * 100
+            """
+            -> Evento en X obtiene el valor desde 0 hasta el ancho maximo de la ventana
+            -> self config('to') devuelve el ultimo valor asignado al ancho
+            -> self.winfo_width() devuelve el ancho de la ventana
+            Se calcula usando regla de tres para obtener el contexto de click en toda la barra de progreso
+            """
+            value = (event.x * self.config('to')[-1]) / self.winfo_width()
             self.set(value)
-            self.clicking = True
-            
+            self.clicking = True   
             #Promesa de ejecucion despues de 1500 ms
             self.after(1000, self._desactivarClicked)
+    
     
     def is_cliked(self):
         # Pregunta si esta activado el evento
