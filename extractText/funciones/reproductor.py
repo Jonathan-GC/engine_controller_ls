@@ -1,4 +1,5 @@
 
+from cgitb import text
 from turtle import left, width
 from PIL import Image
 from PIL import ImageTk
@@ -241,11 +242,26 @@ class MediaPlayer:
     _cont_frames            =   0
     _frames_totales         =   0
 
-
-    def __init__(self, ruta, puntero_frame, frame_to_scale, spinInicio=None, spinFinal=None, spinActual=None):
+    def __init__(self, ruta, puntero_frame, frame_to_scale, spinInicio=None, spinFinal=None, spinActual=None, mainVideo = False):
+        """
+        El reproductor recibe la ruta del video y consigue desplazarce por todos los puntos, asi mismo segmenta el video y lo reproduce
+        ruta: Ruta del video
+        puntero_frame: Elemento donde se va a instalar el reproductor
+        frame_to_scale: Elemento Tk donde se instalará la Barra de progreso
+        spinInicio: spinbox tkk donde se aloja el valor de inicio
+        spinFinal: spinbox tkk donde se aloja el valor de final
+        spinActual: spinbox tkk donde se aloja el valor actual del puntero del reproductor
+        mainVideo: Permite elegir el video si es principal, (elegido del TreeView principal) o no proncipal, que sostenra los fragmentos del video
+        """
         
+        self._mainVideo = mainVideo
+
         self._frame_rango_inicial = tk.IntVar()
+        self._frame_rango_inicial.trace_add("write", self.restric_inicial)
+
         self._frame_rango_final = tk.IntVar()
+        self._frame_rango_final.trace_add("write", self.restric_final)
+        
         self._frame_actual = tk.IntVar()
         self._frame_actual.trace_add("write", self.set_video_position)
         
@@ -254,11 +270,17 @@ class MediaPlayer:
         self.spinActual=spinActual
         self.barra_de_progreso=frame_to_scale
         self.crear_widgets()
-        self.initialize_player(puntero_frame, ruta)
 
         self.spinActual.config(textvariable=self._frame_actual)
+        self.spinInicio.config(textvariable=self._frame_rango_inicial)
+        self.spinFinal.config(textvariable=self._frame_rango_final)
+
+        self._frame_rango_inicial.set(0)
+        self._frame_rango_final.set(1)
         
 
+
+        self.initialize_player(puntero_frame, ruta)
 
     def crear_widgets(self):
         self.button_play = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/play.png", self.play_video)
@@ -275,7 +297,6 @@ class MediaPlayer:
         self.progress_bar = VideoProgressBar(self.barra_de_progreso, self.set_video_position, bg="#e0e0e0", highlightthickness=0, variable=self._frame_actual)
         self.progress_bar.pack(fill=tk.X, padx=10, pady=5)
     
-
     def eliminar_widgets(self):
         # Destruccion de la barra de progreso y botones
         self.progress_bar.destroy()
@@ -284,8 +305,7 @@ class MediaPlayer:
         self.button_stop.destroy()
         self.button_anterior.destroy()
         self.button_adelante.destroy()
-
-    
+  
     def initialize_player(self, frame, ruta):
         self.vlc_instance = vlc.Instance()
         self.media_player = self.vlc_instance.media_player_new()
@@ -299,11 +319,9 @@ class MediaPlayer:
         self.media_player.set_hwnd(frame.winfo_id())
         self.play_video()
                   
-
     def frameActual(self):
         return self.media_player.get_time()//(self.media_player.get_fps() or 1)
-    
-    
+       
     def frames_totales(self):
         try:
             self.media_player.duration()//self.media_player.get_fps()
@@ -345,8 +363,27 @@ class MediaPlayer:
                 self.media_player.set_time(numero_de_frame)
             except:
                 pass
-    
+        
+        if not self._mainVideo:
+            """
+            Si el objeto se establece como un video No principal realizará
+            un loop sobre los parametros elejidos, esto sirve fundamentalmente
+            para que el usuario pueda ver los fragmentos del video y los pueda editar a gusto
+            asi mismo la maquina puede recortar por IA y seleccionar automaticamente los parametro 
+            de entrada y salida del video
+            """
+            inicio = self._frame_rango_inicial.get()
+            fin = self._frame_rango_final.get()
+            actual = self._frame_actual.get()
 
+            if actual > fin:
+                # Se calcula el numero de Frames a tiempo y se establece el reproductor
+                numero_de_frame = self.calcular_frame_to_time(inicio)
+                self.media_player.set_time(numero_de_frame)
+            elif actual < inicio:
+                # Se calcula el numero de Frames a tiempo y se establece el reproductor
+                numero_de_frame = self.calcular_frame_to_time(inicio)
+                self.media_player.set_time(numero_de_frame)
     
     def update_progres_video(self):
         
@@ -359,9 +396,11 @@ class MediaPlayer:
                 if not self._sliding:                    
                     t = max(0, self.calcular_time_to_frame(p.get_time()))
                     if t != barra.get():
-                        # Actualizar Barra de progreso y el spin_actual
-                        self._frame_actual.set(t)
-                        
+                        try:
+                            # Actualizar Barra de progreso y el spin_actual
+                            self._frame_actual.set(t)
+                        except:
+                            barra.set(t)
             else:
                 self._length = tamanio_ms = self.media_player.get_length()
                 
@@ -377,13 +416,18 @@ class MediaPlayer:
 
                     # Configurar los frames maximos
                     barra.config(to=self._frames_totales)
-                    self.spinActual.config(to=self._frames_totales)
+                    self.spinActual.config(to=int(self._frames_totales))
+                    self.spinInicio.config(to=int(self._frames_totales-1))
+                    self.spinFinal.config(to=int(self._frames_totales))
+
+                    self._frame_rango_inicial.set(0)
+                    self._frame_rango_final.set(int(self._frames_totales))
+                    
                     
 
             # re-start cada fotograma
             self.tick_f = self.progress_bar.after(int(self._tick_ms), self.update_progres_video)
-            #self.tick_f = self.progress_bar.after(250, self.update_progres_video)
-    
+
     def calcular_frame_to_time(self, numero_de_frame):
         pendiente = 1000//self._FPS
         position_ms = pendiente * numero_de_frame
@@ -392,7 +436,6 @@ class MediaPlayer:
     def calcular_time_to_frame(self, tiempo):
         return tiempo // self._tick_ms
         
-
     def play_video(self):
         if not self.playing_video:
             self.media_player.play()
@@ -417,7 +460,6 @@ class MediaPlayer:
     
             """
     
-    
     def stop_video(self):
         if self.playing_video == True:
             self.media_player.stop()
@@ -425,8 +467,10 @@ class MediaPlayer:
             self.progress_bar.set(0)
         
     def frame_adelante(self):
-        # Se pausa el video para tener control en todo momento
-        self.pause_video()
+
+        if not self._pausing_video:
+            # Se pausa el video para tener control en todo momento
+            self.pause_video()
         
         
         if self._pausing_video == True:
@@ -436,13 +480,14 @@ class MediaPlayer:
             # Establecer el puntero del reproductor
             self.media_player.set_time(int(tiempo_adelante))
             
-            # Establecer la barra y el spin actual    
-            self._frame_actual.set(tiempo_adelante // self._tick_ms)
+            # Establecer la barra y el spin actual 
+            value_frame = int(tiempo_adelante // self._tick_ms)   
+            self._frame_actual.set(value_frame)
             
-    
     def frame_atras(self):
-        # Se pausa el video para tener control en todo momento
-        self.pause_video()
+        if not self._pausing_video:
+            # Se pausa el video para tener control en todo momento
+            self.pause_video()
 
         if self._pausing_video == True:
             # Resta a el valor actual un frame
@@ -451,13 +496,10 @@ class MediaPlayer:
             # Establecer el puntero del reproductor
             self.media_player.set_time(int(tiempo_anterior))
             
-            # Establecer la barra y el spin actual    
-            self._frame_actual.set(tiempo_anterior // self._tick_ms)
+            # Establecer la barra y el spin actual
+            value_frame = int(tiempo_anterior // self._tick_ms)
+            self._frame_actual.set(value_frame)
             
-
-
-
-
     def ClosePlayer(self):
         
         #print("FPS: ",self.media_player.get_fps())
@@ -473,13 +515,55 @@ class MediaPlayer:
         self.eliminar_widgets()
         # Destruccion del reproductor
         self.media_player.release()
+
+    def restric_inicial(self, *args):
         
+        
+        
+        try:
+        
+            if self._frame_actual.get() < self._frame_rango_inicial.get():
+                #obtencion del valor en el inicial
+                t = self._frame_rango_inicial.get()
+
+                #Colocar la variable al punto inicial siempre y cuando el puntero actual sea menor que el impuesto
+                self._frame_actual.set(t)
+
+                #Convertir frames a tiempo
+                numero_de_frame = self.calcular_frame_to_time(t)
+                
+                #Colocar el  video en el punto de tiempo calculado
+                self.media_player.set_time(numero_de_frame)
+        except:
+            pass
+    
+    def restric_final(self, *args):
+        
+        try:
+            #print(self._frame_actual.get())
+            #print(self._frame_rango_final.get())
+            if self._frame_actual.get() > self._frame_rango_final.get():
+                #obtencion del valor en el final
+                t = self._frame_rango_final.get()
+
+                #Colocar la variable al punto final siempre y cuando el puntero actual sea mayor que el impuesto
+                self._frame_actual.set(t)
+
+                #Convertir frames a tiempo
+                numero_de_frame = self.calcular_frame_to_time(t)
+                
+                #Colocar el  video en el punto de tiempo calculado
+                self.media_player.set_time(numero_de_frame)
+        except:
+            pass
+
+
         
         
 
 class VideoProgressBar(tk.Scale):
     def __init__(self, master,command, **kwargs):
-        #kwargs["showvalue"] = False
+        kwargs["showvalue"] = False
         super().__init__(
             master,
             from_=0,
@@ -560,8 +644,18 @@ if __name__ == "__main__":
 
     frame_to_barra = Frame(frame_root, bg="black", width=800, height=400)
     frame_to_barra.pack(pady=2, fill='x', expand=False)
+
+    inBox_inicio = Spinbox(frame_to_barra,from_=0, to=100)
+    inBox_inicio.pack()
+
+    inBox_Actual = Spinbox(frame_to_barra, from_ = 0, to=100)
+    inBox_Actual.pack()
+
+    inBox_fin = Spinbox(frame_to_barra, from_=1, to=100)
+    inBox_fin.pack()
+
     
-    reproductor = MediaPlayer("sources/Martin Miller.mp4", display, frame_to_barra)
+    reproductor = MediaPlayer("sources/Martin Miller.mp4", display, frame_to_barra, spinInicio=inBox_inicio, spinFinal=inBox_fin, spinActual=inBox_Actual, mainVideo=True)
     #reproductor = MediaPlayer("sources/feliz-2.mp4", display, frame_to_barra)
     #reproductor = MediaPlayer("sources/feliz_3.mp4", display, frame_to_barra)
     #reproductor = MediaPlayer("sources/pexels.mp4", display, frame_to_barra)

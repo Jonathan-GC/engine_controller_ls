@@ -5,7 +5,8 @@ from tkinter import ttk
 
 import tkinter
 from turtle import left, width, window_width
-from idlelib.tooltip import Hovertip #para la informacion de los botones
+from idlelib.tooltip import Hovertip
+from sympy import to_cnf #para la informacion de los botones
 from ttkwidgets import CheckboxTreeview
 #from extractText.funciones import reproductor
 #from torch import fill 
@@ -37,7 +38,7 @@ def item_selected(event):
     if reproductor_video is not None:
         reproductor_video.ClosePlayer()
     
-    reproductor_video = MediaPlayer(ruta, frame_visualizer, frame_botones_procesar, spinInicio=inBox_inicio, spinFinal=inBox_fin, spinActual=inBox_Actual)
+    reproductor_video = MediaPlayer(ruta, frame_visualizer, frame_botones_procesar, spinInicio=inBox_inicio, spinFinal=inBox_fin, spinActual=inBox_Actual, mainVideo=True)
     reproductor_video.update_progres_video()
     
 
@@ -217,7 +218,8 @@ frame_inicio.pack(side='left')
 
 label_inicio = Label(frame_inicio, text="Fotograma Inicio",bg="white").pack()
 #inBox_inicio = Entry(frame_inicio).pack()
-inBox_inicio = Spinbox(frame_inicio).pack()
+inBox_inicio = ttk.Spinbox(frame_inicio,from_=0)
+inBox_inicio.pack()
 
 #------------------------------------|
 #      1.2.3    Frame Actual
@@ -240,7 +242,8 @@ frame_fin.pack(side='left')
 
 label_fin = Label(frame_fin, text="Fotograma Fin",bg="white").pack()
 #inBox_fin = Entry(frame_fin).pack()
-inBox_fin = Spinbox(frame_fin).pack()
+inBox_fin = ttk.Spinbox(frame_fin, from_=1)
+inBox_fin.pack()
 #------------------------------------|
 #       Boton Guardar Video
 # -----------------------------------|
