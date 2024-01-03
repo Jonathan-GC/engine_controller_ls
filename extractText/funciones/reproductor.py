@@ -333,17 +333,18 @@ class MediaPlayer:
         elif self.progress_bar.is_cliked() and self._pausing_video:
             self._frame_actual = self.progress_bar.get()
             
-            #if self.spinActual:
-            #    self.spinActual.set(self.progress_bar.get())
             # Se calcula el numero de Frames a tiempo y se establece el reproductor
             numero_de_frame = self.calcular_frame_to_time(self.progress_bar.get())
             self.media_player.set_time(numero_de_frame)
         
         elif self._pausing_video:
-            value = self._frame_actual.get()
-            # Se calcula el numero de Frames a tiempo y se establece el reproductor
-            numero_de_frame = self.calcular_frame_to_time(value)
-            self.media_player.set_time(numero_de_frame)
+            try:
+                value = self._frame_actual.get()
+                # Se calcula el numero de Frames a tiempo y se establece el reproductor
+                numero_de_frame = self.calcular_frame_to_time(value)
+                self.media_player.set_time(numero_de_frame)
+            except:
+                pass
     
 
     
@@ -358,14 +359,8 @@ class MediaPlayer:
                 if not self._sliding:                    
                     t = max(0, self.calcular_time_to_frame(p.get_time()))
                     if t != barra.get():
-                        # Actualizar Barra de progreso
-                        #barra.set(t)
-
+                        # Actualizar Barra de progreso y el spin_actual
                         self._frame_actual.set(t)
-
-                        # Actualizar etiqueta
-                        #if self.spinActual:
-                        #    self.spinActual.set(t)
                         
             else:
                 self._length = tamanio_ms = self.media_player.get_length()
@@ -380,7 +375,7 @@ class MediaPlayer:
                     # fps totales calculados de (FPS * tamanio_total_ms/1000ms)
                     self._frames_totales = fps*tamanio_ms/1000
 
-                    
+                    # Configurar los frames maximos
                     barra.config(to=self._frames_totales)
                     self.spinActual.config(to=self._frames_totales)
                     
@@ -430,25 +425,34 @@ class MediaPlayer:
             self.progress_bar.set(0)
         
     def frame_adelante(self):
+        # Se pausa el video para tener control en todo momento
         self.pause_video()
+        
+        
         if self._pausing_video == True:
-            #self.media_player.next_frame()
+            # Suma a el valor actual un frame
             tiempo_adelante = self.media_player.get_time() + self._tick_ms
-            self.media_player.set_time(int(tiempo_adelante))
-            self.progress_bar.set(self.media_player.get_time() // self._tick_ms)
             
-            self._frame_actual.set(self.media_player.get_time() // self._tick_ms)
-            #if self.spinActual:
-            #    self.spinActual.set(self.media_player.get_time() // self._tick_ms)
+            # Establecer el puntero del reproductor
+            self.media_player.set_time(int(tiempo_adelante))
+            
+            # Establecer la barra y el spin actual    
+            self._frame_actual.set(tiempo_adelante // self._tick_ms)
+            
     
     def frame_atras(self):
+        # Se pausa el video para tener control en todo momento
         self.pause_video()
+
         if self._pausing_video == True:
+            # Resta a el valor actual un frame
             tiempo_anterior = self.media_player.get_time() - self._tick_ms
+
+            # Establecer el puntero del reproductor
             self.media_player.set_time(int(tiempo_anterior))
-            self.progress_bar.set(tiempo_anterior // self._tick_ms)
-            #if self.spinActual:
-            #    self.spinActual.set(tiempo_anterior // self._tick_ms)
+            
+            # Establecer la barra y el spin actual    
+            self._frame_actual.set(tiempo_anterior // self._tick_ms)
             
 
 
@@ -470,16 +474,6 @@ class MediaPlayer:
         # Destruccion del reproductor
         self.media_player.release()
         
-
-    
-   
-            
-        
-    
-    def funcionBandera(self):
-        print("Nooo jodaa")
-        self._sliding = False
-            
         
         
 
@@ -512,7 +506,7 @@ class VideoProgressBar(tk.Scale):
             self.set(value)
             self.clicking = True   
             #Promesa de ejecucion despues de 1500 ms
-            self.after(1000, self._desactivarClicked)
+            self.after(300, self._desactivarClicked)
     
     
     def is_cliked(self):
