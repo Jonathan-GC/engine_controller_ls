@@ -555,9 +555,6 @@ class MediaPlayer:
             pass
 
 
-        
-        
-
 class VideoProgressBar(tk.Scale):
     def __init__(self, master,command, **kwargs):
         kwargs["showvalue"] = False
