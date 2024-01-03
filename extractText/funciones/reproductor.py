@@ -517,9 +517,6 @@ class MediaPlayer:
         self.media_player.release()
 
     def restric_inicial(self, *args):
-        
-        
-        
         try:
         
             if self._frame_actual.get() < self._frame_rango_inicial.get():
