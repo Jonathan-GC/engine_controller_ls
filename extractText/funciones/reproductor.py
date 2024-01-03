@@ -8,7 +8,7 @@ import imutils
 
 import easyocr
 import threading
-from sympy import false
+from sympy import false, true
 
 import vlc
 from datetime import timedelta
@@ -17,7 +17,7 @@ import time
 #lector en español
 reader = easyocr.Reader(["es"], gpu = True)
 from tkinter import *
-
+from tkinter import ttk
 
 
 class Visualizador_Video:
@@ -232,19 +232,27 @@ class MediaPlayer:
     progress_bar = None
     
     # Hiper variable de control
-    _length         =   0
-    _FPS            =   0
-    _sliding        =   False
-    _playing_video  =   False
-    _pausing_video  =   False
-    _tick_ms        =   100
-    _cont_frames    =   0
-    _frames_totales =   0 
+    _length                 =   0
+    _FPS                    =   0
+    _sliding                =   False
+    _playing_video          =   False
+    _pausing_video          =   False
+    _tick_ms                =   100
+    _cont_frames            =   0
+    _frames_totales         =   0
 
-    def __init__(self, ruta, puntero_frame, frame_to_scale):
-        self.initialize_player(puntero_frame, ruta)
+
+    def __init__(self, ruta, puntero_frame, frame_to_scale, spinInicio=None, spinFinal=None, spinActual=None):
+        self.spinInicio=spinInicio
+        self.spinFinal=spinFinal
+        self.spinActual=spinActual
+        self._frame_rango_inicial = tk.IntVar()
+        self._frame_rango_final = tk.IntVar()
+        self._frame_actual = tk.IntVar()
         self.barra_de_progreso=frame_to_scale
         self.crear_widgets()
+        self.initialize_player(puntero_frame, ruta)
+        
 
 
     def crear_widgets(self):
@@ -254,9 +262,9 @@ class MediaPlayer:
         self.button_pausa.pack(padx=5, side='left')
         self.button_stop = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/stop.png", self.stop_video)
         self.button_stop.pack(padx=5, side='left')
-        self.button_anterior = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/anterior.png", self.funcionBandera)
+        self.button_anterior = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/anterior.png", self.frame_atras)
         self.button_anterior.pack(padx=5, side='left')
-        self.button_adelante = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/adelante.png", self.funcionBandera)
+        self.button_adelante = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/adelante.png", self.frame_adelante)
         self.button_adelante.pack(padx=5, side='left')
         
         self.progress_bar = VideoProgressBar(self.barra_de_progreso, self.set_video_position, bg="#e0e0e0", highlightthickness=0)
@@ -285,16 +293,7 @@ class MediaPlayer:
         self.media_player.set_media(media)
         self.media_player.set_hwnd(frame.winfo_id())
         self.play_video()
-        
-
-
-    def play_video(self):
-        if not self.playing_video:
-            self.media_player.play()
-            self.playing_video = True
-            
-              
-          
+                  
 
     def frameActual(self):
         return self.media_player.get_time()//(self.media_player.get_fps() or 1)
@@ -309,11 +308,15 @@ class MediaPlayer:
     def set_video_position(self, value):
     
         if self.progress_bar.is_cliked() and  self.playing_video == True:
+            # Pausa el video para evitar que se siga reproduciendo 
+            # no es necesario pero el programa se ve mas consistente
             self.pause_video()
             self._sliding = False
 
+            # Cancela el hilo de actualización
             self.progress_bar.after_cancel(self.tick_f)
             
+            # Cancela el hilo de actualización
             pendiente = 1000//self._FPS
             position_ms = pendiente * self.progress_bar.get()
             
@@ -321,10 +324,21 @@ class MediaPlayer:
 
             self.play_video()
             self.update_progres_video()
-            
+        elif self.progress_bar.is_cliked() and self._pausing_video:
+            if self.spinActual:
+                self.spinActual.set(self.progress_bar.get())
+            pendiente = 1000//self._FPS
+            position_ms = pendiente * self.progress_bar.get()
+            self.media_player.set_time(int(position_ms))
+    
+    def calcular_frame_to_time(self, numero_de_frame):
+        pendiente = 1000//self._FPS
+        position_ms = pendiente * numero_de_frame
+        return int(position_ms)
 
     
     def update_progres_video(self):
+        
         if self.media_player and self.playing_video:
             barra = self.progress_bar
             p = self.media_player
@@ -337,6 +351,10 @@ class MediaPlayer:
                         #barra.set(self.frameActual()+1)
                         barra.set(t)
                         # Actualizar etiqueta
+                        
+                        if self.spinActual:
+                            self.spinActual.set(t)
+                        
             else:
                 self._length = tamanio_ms = self.media_player.get_length()
                 
@@ -352,17 +370,27 @@ class MediaPlayer:
 
                     
                     barra.config(to=self._frames_totales)
+                    self.spinActual.config(to=self._frames_totales)
                     print("Puesta del tamaño de frames", self._frames_totales )
             # re-start cada fotograma
-            #self.tick_f = self.progress_bar.after(int(self._tick_ms), self.update_progres_video)
-            self.tick_f = self.progress_bar.after(250, self.update_progres_video)
-
+            self.tick_f = self.progress_bar.after(int(self._tick_ms), self.update_progres_video)
+            #self.tick_f = self.progress_bar.after(250, self.update_progres_video)
     
+
+    def play_video(self):
+        if not self.playing_video:
+            self.media_player.play()
+            self.playing_video = True
+            self._pausing_video=False
+            self.update_progres_video()
+
     def pause_video(self):
         if self.playing_video == True:
-            
+            self.progress_bar.after_cancel(self.tick_f)
             self.media_player.pause()
             self.playing_video = False
+            self._pausing_video=True
+            
             """
             if self.video_paused == True:
                 self.video_paused = False
@@ -380,6 +408,25 @@ class MediaPlayer:
             self.playing_video = False
             self.progress_bar.set(0)
         
+    def frame_adelante(self):
+        self.pause_video()
+        if self._pausing_video == True:
+            #self.media_player.next_frame()
+            tiempo_adelante = self.media_player.get_time() + self._tick_ms
+            self.media_player.set_time(int(tiempo_adelante))
+            self.progress_bar.set(self.media_player.get_time() // self._tick_ms)
+            if self.spinActual:
+                self.spinActual.set(self.media_player.get_time() // self._tick_ms)
+    
+    def frame_atras(self):
+        self.pause_video()
+        if self._pausing_video == True:
+            tiempo_anterior = self.media_player.get_time() - self._tick_ms
+            self.media_player.set_time(int(tiempo_anterior))
+            self.progress_bar.set(tiempo_anterior // self._tick_ms)
+            if self.spinActual:
+                self.spinActual.set(tiempo_anterior // self._tick_ms)
+            
 
 
 
@@ -496,12 +543,12 @@ if __name__ == "__main__":
 
     frame_to_barra = Frame(frame_root, bg="black", width=800, height=400)
     frame_to_barra.pack(pady=2, fill='x', expand=False)
-    print(display.winfo_id())
-    print(frame_root.winfo_id())
-    #reproductor = MediaPlayer("sources/Martin Miller.mp4", display, frame_to_barra)
-    reproductor = MediaPlayer("sources/feliz-2.mp4", display, frame_to_barra)
+    
+    reproductor = MediaPlayer("sources/Martin Miller.mp4", display, frame_to_barra)
+    #reproductor = MediaPlayer("sources/feliz-2.mp4", display, frame_to_barra)
     #reproductor = MediaPlayer("sources/feliz_3.mp4", display, frame_to_barra)
-    reproductor.update_progres_video()
+    #reproductor = MediaPlayer("sources/pexels.mp4", display, frame_to_barra)
+    #reproductor.update_progres_video()
     
 
     frame_root.mainloop()

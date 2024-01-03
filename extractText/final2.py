@@ -37,7 +37,7 @@ def item_selected(event):
     if reproductor_video is not None:
         reproductor_video.ClosePlayer()
     
-    reproductor_video = MediaPlayer(ruta, frame_visualizer, frame_botones_procesar)
+    reproductor_video = MediaPlayer(ruta, frame_visualizer, frame_botones_procesar, spinInicio=inBox_inicio, spinFinal=inBox_fin, spinActual=inBox_Actual)
     reproductor_video.update_progres_video()
     
 
@@ -216,7 +216,8 @@ frame_inicio.config(bg="white", width=104)
 frame_inicio.pack(side='left')
 
 label_inicio = Label(frame_inicio, text="Fotograma Inicio",bg="white").pack()
-inBox_inicio = Entry(frame_inicio).pack()
+#inBox_inicio = Entry(frame_inicio).pack()
+inBox_inicio = Spinbox(frame_inicio).pack()
 
 #------------------------------------|
 #      1.2.3    Frame Actual
@@ -226,7 +227,9 @@ frame_actual.config(bg="white", width=104)
 frame_actual.pack(side='left')
 
 label_actual = Label(frame_actual, text="Fotograma Actual", bg="white").pack()
-inBox_Actual = Entry(frame_actual, state='disabled').pack()
+#inBox_Actual = Entry(frame_actual, state='disabled').pack()
+inBox_Actual = ttk.Spinbox(frame_actual, from_ = 0)
+inBox_Actual.pack()
 
 #------------------------------------|
 #    1.2.4   Frame insert Fin
@@ -236,8 +239,8 @@ frame_fin.config(bg="white", width=104)
 frame_fin.pack(side='left')
 
 label_fin = Label(frame_fin, text="Fotograma Fin",bg="white").pack()
-inBox_fin = Entry(frame_fin).pack()
-
+#inBox_fin = Entry(frame_fin).pack()
+inBox_fin = Spinbox(frame_fin).pack()
 #------------------------------------|
 #       Boton Guardar Video
 # -----------------------------------|
