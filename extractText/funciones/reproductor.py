@@ -1,6 +1,3 @@
-
-from cgitb import text
-from turtle import left, width
 from PIL import Image
 from PIL import ImageTk
 import cv2
@@ -8,8 +5,7 @@ import numpy as np
 import imutils
 
 import easyocr
-import threading
-from sympy import false, true
+from sympy import capture, false, true
 
 import vlc
 from datetime import timedelta
@@ -19,6 +15,172 @@ import time
 reader = easyocr.Reader(["es"], gpu = True)
 from tkinter import *
 from tkinter import ttk
+
+
+class visualizador_video2:
+    _activate_borrador      = False
+    _activate_roi_on_person = False
+    name_window = "Imagen"
+    
+    #Roi Definido por dos puntos
+    p1, p2 = None, None # Roi Persona
+
+    list_puntos_difuminar = []
+    p3, p4 = None, None # Roi Texto
+    
+    _estado = 0
+    estado1 = 0
+    
+    contador_frames = 0
+
+    def __init__(self, ruta):
+        self.tamanio_video = 0.5
+        self.ruta = ruta
+    
+    def mostrarImagen(self):
+        imagen = cv2.imread("sources/temp/Captura1.png")
+
+    
+    def mostrarVideo(self):
+        """
+        Abre una ventana OpenCV que permite el analisis de imagen
+        """
+        #Iniciacion del video
+        self.capture = cv2.VideoCapture(self.ruta)
+        
+        while true:
+            ret, img = self.capture.read()
+            if not ret:
+                break
+            else:
+                self.imagen_general=img.copy()
+                self.imagen_respaldo=img.copy()
+                
+                # Para dar un roi sobre Persona
+                if self._estado  == 2:
+                    img = cv2.rectangle(img, self.p1, self.p2, (255, 0, 0), 2)
+                    self.imagen_persona = self.imagen_general[int(self.p1[1]) : int(self.p2[1]), int(self.p1[0]) : int(self.p2[0])]
+                    
+
+                # Roi para eliminar texto inecesario de los videos
+                for puntos in self.list_puntos_difuminar:
+                    # Dibujar Rectangulo
+                    cv2.rectangle(img, puntos[0], puntos[1], (0, 255, 0), 2)
+                    area_for_borrar = self.imagen_general[puntos[0][1]: puntos[1][1], puntos[0][0]: puntos[1][0]]
+                    # Borrar area con un kernel de (31, 31)
+                    area_for_borrar = cv2.blur(area_for_borrar, (31,31), cv2.BORDER_DEFAULT)
+                    #Reemplazar esa areas por el nuevo
+                    img[puntos[0][1]: puntos[1][1], puntos[0][0]: puntos[1][0]] = area_for_borrar
+
+
+                if self.mostrar_ventana:
+                    cv2.imshow(self.name_window, img)
+                    if cv2.waitKey(1) == ord("q"):
+                        break
+        self.capture.release()
+        cv2.destroyWindow(self.name_window)
+
+    # Llamada a eventos del mouse
+    def seleccionar_area(self, event, x, y, flags, param):
+
+        # Ejemplos de acciones con algunos eventos del mouse   
+        if event == cv2.EVENT_LBUTTONDBLCLK:
+            
+            if  self._activate_borrador and  self.estado1 == 0:
+                self.p3 = (x, y)
+                self.estado1 = 1
+            
+            elif self._activate_borrador and self.estado1 == 1:
+                self.p4 = (x, y)
+                #Pasar por el filtro de orden y evitar errores a la hora de dibujar
+                p3, p4 = self.organizador_de_puntos(self.p3, self.p4)
+                self.list_puntos_difuminar.append([p3, p4])
+                self.estado1 = 0
+                self.bandera_ALT = 0
+            
+            #Seleccionar primer punto
+            elif self._activate_roi_on_person and self._estado == 0:
+                self.p1 = (x, y)
+                self._estado = 1
+            
+            #selecionar segundo punto
+            elif self._activate_roi_on_person and self._estado == 1:
+                self.p2 = (x, y)
+                self._estado = 2
+                
+            
+
+
+        if self._activate_borrador and event == cv2.EVENT_RBUTTONUP:
+            self.p3, self.p4 = None, None
+            self.list_puntos_difuminar.clear()
+
+            # Llamado a la limpieza de la imagen
+            self.limpiarImagen()
+
+        elif event == cv2.EVENT_RBUTTONUP:
+            self._estado = 0
+            self.p1, self.p2 = None, None
+            self.limpiarImagen()
+        
+
+            
+    def organizador_de_puntos(self, punto1, punto2):
+        """
+        Esta funcion permite organizar el orden de los puntos para que todo dibujo
+        que se haga siempre vaya de menor a mayor y devuelve una tupla con esos
+        puntos ordenados 
+        """
+        xmin, ymin = punto1
+        xmax, ymax = punto2
+
+        if ymin < ymax:
+            if xmin < xmax:
+                return (xmin, ymin), (xmax, ymax)
+            else:
+                return (xmax, ymin), (xmin, ymax)
+        else:
+            if xmin > xmax:
+                return (xmax, ymax), (xmin, ymin)
+            else:
+                return (xmin, ymax), (xmax, ymin)
+
+    def motrar_roi(self, mode):
+        """
+        Funcion para activar los roi de borrador y persona
+        value->int: 1. ativar borrador
+                    2. activar roi persona
+        """
+        # Activar la ventana de opencv
+        self.mostrar_ventana = True
+        if mode == 1:
+            self.activar_Roi_on_person(False)
+            self.activar_borrador(True)
+        elif mode == 2:
+            self.activar_borrador(False)
+            self.activar_Roi_on_person(True)
+
+        cv2.namedWindow(self.name_window)  
+        # Introducir los callBack del mouse
+        cv2.setMouseCallback(self.name_window, self.seleccionar_area)
+    def limpiarImagen(self):
+        self.imagen_general = self.imagen_respaldo
+    def activar_borrador(self, value):
+        """
+        Activar o desactivar borrador
+        value: int -> True.  activar; 
+                      False. desactivar 
+        """
+        self._activate_borrador = True if value else False
+    def activar_Roi_on_person(self, value):
+        """
+        Activar o desactivar ROI sobre el personaje principal a analizar
+        Sino se activa el tomara el personaje unico o el mas "grande" existente 
+        por inferencia
+        value: int -> True.  activar; 
+                      False. desactivar 
+        """
+        self._activate_roi_on_person = True if value else False
 
 
 class Visualizador_Video:
@@ -49,27 +211,32 @@ class Visualizador_Video:
     palabraAnterior = None
     contador = 0
 
-    def __init__(self, etiquetaVideo, etiquetaRoiPersonaje, etiquetaRoiText, etiquetaBodyPoints ) -> None:
+    def __init__(self, etiquetaVideo=None, etiquetaRoiPersonaje=None, etiquetaRoiText=None, etiquetaBodyPoints=None ) -> None:
         self.etiquetaVideo = etiquetaVideo
         self.etiquetaRoiPersonaje = etiquetaRoiPersonaje
         self.etiquetaRoiText = etiquetaRoiText
         self.etiquetaBodyPoints = etiquetaBodyPoints
-        
+        self.motrar_roi()
+    
+    def iniciar_imagen(self, ruta):
+        imagen = cv2.imread(ruta)
+        cv2.imshow("Imagen", imagen)
+        cv2.waitKey()
+        cv2.destroyWindow("Imagen")
 
 
     def iniciar_video(self, ruta):
                 
-        cap = cv2.VideoCapture(ruta)
+        self.cap = cv2.VideoCapture(ruta)
         if self.last_task is not None:
             self.etiquetaVideo.after_cancel(self.last_task)
         
-        self._visualizar(cap)
-
-        
+        self._visualizar()
 
 
-    def _visualizar(self, captura):
-    
+
+    def _visualizar(self):
+        captura=self.cap
         try:
             #Extraer la velocidad del video en ms
             fps = int(captura.get(cv2.CAP_PROP_FPS))
@@ -93,8 +260,8 @@ class Visualizador_Video:
                             imagen_persona = cv2.cvtColor(imagen_persona, cv2.COLOR_BGR2RGB)
                             im_persona = Image.fromarray(imagen_persona)
                             img_persona = ImageTk.PhotoImage(image=im_persona)
-                            self.etiquetaRoiPersonaje.configure(image=img_persona)
-                            self.etiquetaRoiPersonaje.image = img_persona
+                            #self.etiquetaRoiPersonaje.configure(image=img_persona)
+                            #self.etiquetaRoiPersonaje.image = img_persona
                         
                         for puntos in self.list_puntos_difuminar:
                             cv2.rectangle(self.imagen_general, puntos[0], puntos[1], (0, 255, 0), 2)
@@ -115,8 +282,8 @@ class Visualizador_Video:
                             """
                         cv2.imshow("Imagen", self.imagen_general)
                         
-                        palabra = self.analisiText(imagen)
-                        print(palabra)
+                        #palabra = self.analisiText(imagen)
+                        #print(palabra)
                         
                         """
                         if palabra:
@@ -130,6 +297,7 @@ class Visualizador_Video:
                     else:
                         cv2.destroyAllWindows()
 
+                    """
                     # 1. Redimensionar al tamaño del GUI
                     imagen = imutils.resize(imagen, height=480)
                     # 2. Colorear en RGB, ya que originalmente viene en BGR
@@ -142,6 +310,7 @@ class Visualizador_Video:
                     self.etiquetaVideo.image = img
                     # 5. Iniciar el procesamiento en paralelo y guardar el id de la tarea para pararla cuando desee
                     self.last_task = self.etiquetaVideo.after(velocidad_video, self._visualizar, captura)
+                    """
                     
                 else:
                     #Quitar la captura
@@ -178,6 +347,7 @@ class Visualizador_Video:
             elif self.estado == 1:
                 self.p2 = (x, y)
                 self.estado = 2
+                
             
 
 
@@ -191,6 +361,8 @@ class Visualizador_Video:
         elif event == cv2.EVENT_RBUTTONUP:
             self.p1, self.p2 = None, None
             self.estado = 0
+        
+
             
             
 
@@ -206,10 +378,6 @@ class Visualizador_Video:
         self.imagen_general = self.imagen_respaldo
 
         
-        
-        
-        
-
     def quitar_ventana(self):
         self.mostrar_ventana = False
 
@@ -241,8 +409,9 @@ class MediaPlayer:
     _tick_ms                =   100
     _cont_frames            =   0
     _frames_totales         =   0
+    _snapshot               =   0
 
-    def __init__(self, ruta, puntero_frame, frame_to_scale, spinInicio=None, spinFinal=None, spinActual=None, mainVideo = False):
+    def __init__(self, ruta, puntero_frame, frame_to_scale, spinInicio=None, spinFinal=None, spinActual=None, mainVideo = True):
         """
         El reproductor recibe la ruta del video y consigue desplazarce por todos los puntos, asi mismo segmenta el video y lo reproduce
         ruta: Ruta del video
@@ -253,7 +422,7 @@ class MediaPlayer:
         spinActual: spinbox tkk donde se aloja el valor actual del puntero del reproductor
         mainVideo: Permite elegir el video si es principal, (elegido del TreeView principal) o no proncipal, que sostenra los fragmentos del video
         """
-        
+        self.ruta = ruta
         self._mainVideo = mainVideo
 
         self._frame_rango_inicial = tk.IntVar()
@@ -278,9 +447,11 @@ class MediaPlayer:
         self._frame_rango_inicial.set(0)
         self._frame_rango_final.set(1)
         
+        # Visualizador openCV para procesamiento dedicado
+        self.visualizador = visualizador_video2(self.ruta)
 
-
-        self.initialize_player(puntero_frame, ruta)
+        # Iniciar el reproductor de vista previa
+        self.initialize_player(puntero_frame, self.ruta)
 
     def crear_widgets(self):
         self.button_play = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/play.png", self.play_video)
@@ -553,6 +724,38 @@ class MediaPlayer:
                 self.media_player.set_time(numero_de_frame)
         except:
             pass
+    
+    def borrar_segmentos(self):
+        """Permite borrar los segmentos ejecuntando un visualizador opencv"""
+        try:
+            #lanzar vizualizer en modo 1 (borrador)
+            self.visualizador.motrar_roi(1)
+            self.visualizador.mostrarVideo()
+        except:
+            print("No fue posible lanzar el segmentador")
+    
+    def seleccionar_personaje(self):
+        """Permite seleccionar el personaje sobre el cual se vaz a realizar la inferencia"""
+        try:
+            #lanzar vizualizer en modo 2 (personaje)
+            self.visualizador.motrar_roi(2)
+            self.visualizador.mostrarVideo()
+        except:
+            print("No fue posible lanzar el segmentador")
+
+    def tomar_snapshot(self):
+        """Tomar foto para hacer ediciones"""
+        p = self.media_player
+        if p and p.get_media():
+            self._snapshot = 1
+            file_name = f"sources/temp/Captura{self._snapshot}.png" # Solamente PNG
+            if p.video_take_snapshot(0, file_name, 0, 0):
+                self.showerror(file_name)
+        v = visualizador_video2(self.ruta, 1)
+        
+            
+            
+
 
 
 class VideoProgressBar(tk.Scale):
@@ -613,13 +816,6 @@ class BotonesControl(tk.Button):
             )
 
 
-    
-        
-
-            
-        
-
-
 if __name__ == "__main__":
     #app = MediaPlayer()
     #app.update_video_progress()
@@ -649,12 +845,17 @@ if __name__ == "__main__":
     inBox_fin.pack()
 
     
-    reproductor = MediaPlayer("sources/Martin Miller.mp4", display, frame_to_barra, spinInicio=inBox_inicio, spinFinal=inBox_fin, spinActual=inBox_Actual, mainVideo=True)
+
+    
+    #reproductor = MediaPlayer("sources/Martin Miller.mp4", display, frame_to_barra, spinInicio=inBox_inicio, spinFinal=inBox_fin, spinActual=inBox_Actual, mainVideo=False)
+    reproductor = MediaPlayer("sources/feliz-2.mp4", display, frame_to_barra, spinInicio=inBox_inicio, spinFinal=inBox_fin, spinActual=inBox_Actual, mainVideo=False)
     #reproductor = MediaPlayer("sources/feliz-2.mp4", display, frame_to_barra)
     #reproductor = MediaPlayer("sources/feliz_3.mp4", display, frame_to_barra)
     #reproductor = MediaPlayer("sources/pexels.mp4", display, frame_to_barra)
-    #reproductor.update_progres_video()
     
+    #opencv = visualizador_video2()
+    boton_borrador = Button(frame_to_barra, text="Borrador", command=reproductor.tomar_snapshot)
+    boton_borrador.pack(side='right')
 
     frame_root.mainloop()
 

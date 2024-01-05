@@ -1,17 +1,45 @@
-import tkinter as tk
-from tkinter import *
-my_w = tk.Tk()
-my_w.geometry("300x200") 
-my_w.title("www.plus2net.com") 
+import cv2
+import numpy as np
 
-font1=('Arial',24,'bold')
-sv = StringVar() #string variable 
-sb = Spinbox(my_w,textvariable=sv,font=font1,
-     width=3,from_=0,to=100)
-sb.grid(row=1,column=1,padx=30,pady=10)
+start = False
 
-sc = Scale(my_w, from_=0, to=100, font=font1,
-    orient=HORIZONTAL,variable=sv,length=180)
-sc.grid(row=2,column=1,padx=30)
-ss = Spinbox(my_w,textvariable=sv, to=100)
-my_w.mainloop()  # Keep the window open
+def on_trackbar(value):
+    pass
+
+def on_mouse(event, x, y, flags, param):
+
+    global start
+    pt = (x, y)
+
+    if event == cv2.EVENT_LBUTTONDOWN:
+        start = True
+    elif event == cv2.EVENT_LBUTTONUP:
+        start = False
+    elif start and event == cv2.EVENT_MOUSEMOVE:
+        ventana = 'Drawing'
+        grosor = cv2.getTrackbarPos('Grosor', ventana)
+
+        print(param)
+        cv2.circle(param, pt, grosor, (255, 0, 255), -1)
+
+if __name__ == "__main__":
+
+    title = 'Drawing'
+    image = np.zeros((600, 800, 3), np.uint8)
+    image = cv2.imread("sources/temp/Captura1.png")
+    
+    cv2.namedWindow(title)
+    cv2.createTrackbar('Grosor', title, 5, 50, on_trackbar) 
+    cv2.setMouseCallback(title, on_mouse, image)
+
+    while(1):
+        cv2.imshow(title, image)
+        if cv2.waitKey(20) & 0xFF == 27:
+            break
+        
+    cv2.destroyAllWindows()
+
+#joder = cv2.imread("sources/temp/Captura1.png")
+#cv2.imshow("JJJ", joder)
+#cv2.waitKey()
+#cv2.destroyAllWindows()

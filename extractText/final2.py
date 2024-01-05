@@ -8,8 +8,6 @@ from turtle import left, width, window_width
 from idlelib.tooltip import Hovertip
 from sympy import to_cnf #para la informacion de los botones
 from ttkwidgets import CheckboxTreeview
-#from extractText.funciones import reproductor
-#from torch import fill 
 
 from funciones.reproductor import MediaPlayer
 
@@ -40,6 +38,9 @@ def item_selected(event):
     
     reproductor_video = MediaPlayer(ruta, frame_visualizer, frame_botones_procesar, spinInicio=inBox_inicio, spinFinal=inBox_fin, spinActual=inBox_Actual, mainVideo=True)
     reproductor_video.update_progres_video()
+    button_eraser.config(command=reproductor_video.borrar_segmentos) 
+    button_selec_user.config(command=reproductor_video.seleccionar_personaje)
+    
     
 
 
@@ -104,19 +105,20 @@ grupo_tools_bar.pack( anchor='center', side='left', padx=20)
 #
 #----------------------------------------------------
 img_boton3 = tkinter.PhotoImage(file="extractText/app_sources/icons/eraser.png")
-button_eraser = Button(grupo_tools_bar, image=img_boton3, text = "Directorio Entrada")
+button_eraser = Button(grupo_tools_bar, image=img_boton3, text = "Borrador")
 button_eraser.config(width=35, height=35)
 button_eraser.pack(padx=5, side='left')
 Hovertip(button_eraser, text="Elimina los segmentos de texto\nque no quiere que sean reconocidos dentro del video", hover_delay=500)
 
+
 img_boton4 = tkinter.PhotoImage(file="extractText/app_sources/icons/SelectUser.png")
-button_selec_user = Button(grupo_tools_bar, image=img_boton4, text = "Directorio Entrada")
+button_selec_user = Button(grupo_tools_bar, image=img_boton4, text = "Seleccionar Usuario")
 button_selec_user.config(width=35, height=35)
 button_selec_user.pack(padx=5, side='left')
 Hovertip(button_selec_user, text="Selecciona el segmento de la persona que quiere reconocer", hover_delay=500)
 
 img_boton5 = tkinter.PhotoImage(file="extractText/app_sources/icons/pointer.png")
-button_pointer = Button(grupo_tools_bar, image=img_boton5, text = "Directorio Entrada")
+button_pointer = Button(grupo_tools_bar, image=img_boton5, text = "puntero")
 button_pointer.config(width=35, height=35)
 button_pointer.pack(padx=5, side='right')
 Hovertip(button_selec_user, text="Usar el puntero", hover_delay=500)
