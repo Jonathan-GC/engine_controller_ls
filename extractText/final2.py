@@ -42,6 +42,7 @@ def item_selected(event):
     button_selec_user.config(command=reproductor_video.seleccionar_personaje)
     
     
+    
 
 
 #Ventana principal

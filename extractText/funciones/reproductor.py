@@ -20,16 +20,20 @@ from tkinter import ttk
 class visualizador_video2:
     _activate_borrador      = False
     _activate_roi_on_person = False
-    name_window = "Imagen"
+    name_window = "Ventana Edición"
     
     #Roi Definido por dos puntos
     p1, p2 = None, None # Roi Persona
+    list_marcos_persona = []
 
     list_puntos_difuminar = []
     p3, p4 = None, None # Roi Texto
     
-    _estado = 0
-    estado1 = 0
+    _estado = 0 #Biestable para los clicks del mouse
+    _estado1 = 0 #Biestable para los clicks del mouse
+    _len_actual = 0 #Permite conocer el tamaño la lista de puntos difuminados
+    _len_anterior = 0#Permite conocer si el tamaño la lista cambió
+    _destruir_window = False
     
     contador_frames = 0
 
@@ -37,8 +41,55 @@ class visualizador_video2:
         self.tamanio_video = 0.5
         self.ruta = ruta
     
-    def mostrarImagen(self):
-        imagen = cv2.imread("sources/temp/Captura1.png")
+    def mostrarImagen(self, route):
+        """
+        Mostrar la imagen sobre la que se van a realizar los respectivos marcos de borrado y areas de interes
+            route -> str: Recibe la ruta donde se almacena el archivo temporal que se va a leer y marcar
+        """
+        img = cv2.imread(route)
+        # Respaldar la imagen
+        self.imagen_respaldo=img.copy()
+        self.imagen_general=img.copy()
+        self.imagen_persona = img.copy() 
+        while True:
+
+            # Extraer el tamaño de los puntos a difuminar
+            self._len_actual = len(self.list_puntos_difuminar)
+
+            if self._len_actual != self._len_anterior:
+
+                # Roi para eliminar texto inecesario de los videos
+                for puntos in self.list_puntos_difuminar:
+                    cv2.rectangle(img, puntos[0], puntos[1], (0, 255, 0), 2)
+                    area_for_borrar = self.imagen_general[puntos[0][1]: puntos[1][1], puntos[0][0]: puntos[1][0]]
+                    # Borrar area con un kernel de (31, 31)
+                    area_for_borrar = cv2.blur(area_for_borrar, (31,31), cv2.BORDER_DEFAULT)
+                    #Reemplazar esa areas por el nuevo
+                    self.imagen_general[puntos[0][1]: puntos[1][1], puntos[0][0]: puntos[1][0]] = area_for_borrar
+                
+
+                # Actualizar el valor de la lista
+                self._len_anterior = self._len_actual
+
+            
+            # Para dar un roi sobre Persona
+            if self._estado  == 2:
+                cv2.rectangle(self.imagen_general, self.p1, self.p2, (255, 0, 0), 2)
+                self.imagen_persona = self.imagen_general[int(self.p1[1]) : int(self.p2[1]), int(self.p1[0]) : int(self.p2[0])]
+                
+            
+            
+            if self.mostrar_ventana:
+                cv2.imshow(self.name_window, self.imagen_general)
+
+                # Espera a que el usuario procione una tecla para continuar
+                if cv2.waitKey(50) == 27 or self._destruir_window:
+                    self._len_anterior = 0 # Reiniciar la variable para que al abrir nuevamente la ventana haga el checking de los puntos establecidos
+                    self._destruir_window = False
+                    break
+            
+
+        cv2.destroyWindow(self.name_window)
 
     
     def mostrarVideo(self):
@@ -86,17 +137,16 @@ class visualizador_video2:
         # Ejemplos de acciones con algunos eventos del mouse   
         if event == cv2.EVENT_LBUTTONDBLCLK:
             
-            if  self._activate_borrador and  self.estado1 == 0:
+            if  self._activate_borrador and  self._estado1 == 0:
                 self.p3 = (x, y)
-                self.estado1 = 1
+                self._estado1 = 1
             
-            elif self._activate_borrador and self.estado1 == 1:
+            elif self._activate_borrador and self._estado1 == 1:
                 self.p4 = (x, y)
                 #Pasar por el filtro de orden y evitar errores a la hora de dibujar
                 p3, p4 = self.organizador_de_puntos(self.p3, self.p4)
                 self.list_puntos_difuminar.append([p3, p4])
-                self.estado1 = 0
-                self.bandera_ALT = 0
+                self._estado1 = 0
             
             #Seleccionar primer punto
             elif self._activate_roi_on_person and self._estado == 0:
@@ -106,22 +156,22 @@ class visualizador_video2:
             #selecionar segundo punto
             elif self._activate_roi_on_person and self._estado == 1:
                 self.p2 = (x, y)
+                self.p1, self.p2 = self.organizador_de_puntos(self.p1, self.p2)
                 self._estado = 2
-                
-            
-
 
         if self._activate_borrador and event == cv2.EVENT_RBUTTONUP:
-            self.p3, self.p4 = None, None
-            self.list_puntos_difuminar.clear()
-
             # Llamado a la limpieza de la imagen
             self.limpiarImagen()
+            self.p3, self.p4 = None, None
+            self.list_puntos_difuminar.clear()
+            
 
-        elif event == cv2.EVENT_RBUTTONUP:
+        elif self._activate_roi_on_person and event == cv2.EVENT_RBUTTONUP:
             self._estado = 0
             self.p1, self.p2 = None, None
-            self.limpiarImagen()
+            self.imagen_persona = self.imagen_respaldo.copy()
+            self._destruir_window = True
+
         
 
             
@@ -164,7 +214,7 @@ class visualizador_video2:
         # Introducir los callBack del mouse
         cv2.setMouseCallback(self.name_window, self.seleccionar_area)
     def limpiarImagen(self):
-        self.imagen_general = self.imagen_respaldo
+        self.imagen_general = self.imagen_respaldo.copy()
     def activar_borrador(self, value):
         """
         Activar o desactivar borrador
@@ -409,7 +459,9 @@ class MediaPlayer:
     _tick_ms                =   100
     _cont_frames            =   0
     _frames_totales         =   0
-    _snapshot               =   0
+    _snapshot               =   "1aa5cd5e16848db5fd9be65a0ed17ec2"
+    _path_temp              =   "temp/"
+    
 
     def __init__(self, ruta, puntero_frame, frame_to_scale, spinInicio=None, spinFinal=None, spinActual=None, mainVideo = True):
         """
@@ -728,18 +780,40 @@ class MediaPlayer:
     def borrar_segmentos(self):
         """Permite borrar los segmentos ejecuntando un visualizador opencv"""
         try:
+            estado_video_anterior = True if self.playing_video else False
+            if self.playing_video:
+                self.tomar_snapshot()
+                self.pause_video()
+            elif self._pausing_video:
+                self.tomar_snapshot()
+
             #lanzar vizualizer en modo 1 (borrador)
             self.visualizador.motrar_roi(1)
-            self.visualizador.mostrarVideo()
+            self.visualizador.mostrarImagen(f"{self._path_temp + self._snapshot}.png")
         except:
             print("No fue posible lanzar el segmentador")
     
     def seleccionar_personaje(self):
         """Permite seleccionar el personaje sobre el cual se vaz a realizar la inferencia"""
         try:
+            estado_video_anterior = True if self.playing_video else False
+            if self.playing_video:
+                self.tomar_snapshot()
+                self.pause_video()
+            elif self._pausing_video:
+                self.tomar_snapshot()
+                
+            
             #lanzar vizualizer en modo 2 (personaje)
             self.visualizador.motrar_roi(2)
-            self.visualizador.mostrarVideo()
+            self.visualizador.mostrarImagen(f"{self._path_temp + self._snapshot}.png")
+
+            # Si estaba reproduciendo al cerrar va a volver a reproducir
+            if estado_video_anterior:
+                self.play_video()
+                
+
+
         except:
             print("No fue posible lanzar el segmentador")
 
@@ -747,11 +821,10 @@ class MediaPlayer:
         """Tomar foto para hacer ediciones"""
         p = self.media_player
         if p and p.get_media():
-            self._snapshot = 1
-            file_name = f"sources/temp/Captura{self._snapshot}.png" # Solamente PNG
+            file_name = f"{self._path_temp + self._snapshot}.png" # Solamente PNG
             if p.video_take_snapshot(0, file_name, 0, 0):
                 self.showerror(file_name)
-        v = visualizador_video2(self.ruta, 1)
+
         
             
             
