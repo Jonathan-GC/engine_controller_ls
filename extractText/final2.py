@@ -1,15 +1,13 @@
 #librerias
-from struct import pack
+
 from tkinter import *
 from tkinter import ttk
-
 import tkinter
-from turtle import left, width, window_width
 from idlelib.tooltip import Hovertip
 from sympy import to_cnf #para la informacion de los botones
 from ttkwidgets import CheckboxTreeview
 
-from funciones.reproductor import MediaPlayer
+from funciones.reproductor import MediaPlayer, objeto
 
 reproductor_video = None
 
@@ -38,8 +36,10 @@ def item_selected(event):
     
     reproductor_video = MediaPlayer(ruta, frame_visualizer, frame_botones_procesar, spinInicio=inBox_inicio, spinFinal=inBox_fin, spinActual=inBox_Actual, mainVideo=True)
     reproductor_video.update_progres_video()
-    button_eraser.config(command=reproductor_video.borrar_segmentos) 
-    button_selec_user.config(command=reproductor_video.seleccionar_personaje)
+    
+
+
+
     
     
     
@@ -106,15 +106,13 @@ grupo_tools_bar.pack( anchor='center', side='left', padx=20)
 #
 #----------------------------------------------------
 img_boton3 = tkinter.PhotoImage(file="extractText/app_sources/icons/eraser.png")
-button_eraser = Button(grupo_tools_bar, image=img_boton3, text = "Borrador")
-button_eraser.config(width=35, height=35)
+button_eraser = ttk.Button(grupo_tools_bar, image=img_boton3, text = "Borrador", width=35)
 button_eraser.pack(padx=5, side='left')
 Hovertip(button_eraser, text="Elimina los segmentos de texto\nque no quiere que sean reconocidos dentro del video", hover_delay=500)
 
 
 img_boton4 = tkinter.PhotoImage(file="extractText/app_sources/icons/SelectUser.png")
-button_selec_user = Button(grupo_tools_bar, image=img_boton4, text = "Seleccionar Usuario")
-button_selec_user.config(width=35, height=35)
+button_selec_user = ttk.Button(grupo_tools_bar, image=img_boton4, text = "Seleccionar Usuario", width=35)
 button_selec_user.pack(padx=5, side='left')
 Hovertip(button_selec_user, text="Selecciona el segmento de la persona que quiere reconocer", hover_delay=500)
 
@@ -316,6 +314,10 @@ etiqueta_nombre_archivo = Label(frame_campo_nombre_archivo, text="Nombre de\narc
 inbox_nombre_archivo = Entry(frame_campo_nombre_archivo, state='disabled').pack(side='left')
 
 
+
+#my_objeto = objeto()
+#button_eraser.config(command=lambda:my_objeto.lanzador(2)) 
+#button_selec_user.config(command=lambda:my_objeto.lanzador(1))
 if __name__ == "__main__":
-    
+    #button_eraser.config(command=reproductor_video.seleccionador_de_procesos) 
     frame_root.mainloop()

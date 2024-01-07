@@ -5,7 +5,6 @@ import numpy as np
 import imutils
 
 import easyocr
-from sympy import capture, false, true
 
 import vlc
 from datetime import timedelta
@@ -15,6 +14,8 @@ import time
 reader = easyocr.Reader(["es"], gpu = True)
 from tkinter import *
 from tkinter import ttk
+import multiprocessing as mp
+from multiprocessing import Process
 
 
 class visualizador_video2:
@@ -232,6 +233,93 @@ class visualizador_video2:
         """
         self._activate_roi_on_person = True if value else False
 
+class objeto:
+    
+    palabra = "Joider tio"
+    palabra2 = "mi mama me ama"
+    def __init__(self) -> None:
+        pass
+
+    def funcion1(self, colaOut):
+        contador = 0
+        while 1:
+            contador += 1
+            print("Func1: ", contador, self.palabra)
+            time.sleep(0.1)
+            
+            if contador > 80:
+                break
+        palabra = "La vida"
+        colaOut.put(palabra)
+        
+        #r = Process(target=self.funcion3, args=(colaSalida))
+        #r.start()
+        #r.join()
+        
+        
+        
+    
+    def funcion2(self, colaOut):
+        contador = 0
+        while 1:
+            contador += 2
+            print("Func2: ", contador, self.palabra2)
+            time.sleep(0.2)
+            if contador > 120:
+                break
+        palabra = "es maravillosa"
+        colaOut.put(palabra)
+        
+    
+    def funcion3(self, colaOut):
+        contador = 0
+        while 1:
+            contador += 2
+            print("Func3: ", contador)
+            time.sleep(0.02)
+            if contador > 200:
+                break
+        palabra = "KenJonathan"
+        colaOut.put(palabra)
+        
+    
+    def lanzador(self,mode):
+        
+        colaIn = mp.Queue()
+        
+        if mode == 1:
+            self.p = Process(target=self.funcion1, args=(colaIn,))
+            self.p.start()
+            
+        elif mode == 2:
+            self.p = Process(target=self.funcion2, args=(colaIn,))
+            self.p.start()
+            
+        frase = ""
+        self.p.join()
+        
+        
+        x = colaIn.get()
+        print(x)
+        
+        colaIn.close()
+
+        
+            
+        
+        #self.cola.close()
+        #self.cola.join_thread()
+        #frase += self.cola.get()
+        
+        #self.cola.close()
+        #self.cola.join_thread()
+        #self.q.join()
+        #self.p.join()
+        print(frase)
+        
+    def unir(self):
+        #self.p.join()
+        print("Salio")
 
 class Visualizador_Video:
 
@@ -505,6 +593,10 @@ class MediaPlayer:
         # Iniciar el reproductor de vista previa
         self.initialize_player(puntero_frame, self.ruta)
 
+        p = Process(target=self.funcion1)
+        p.start()
+        p.join()
+
     def crear_widgets(self):
         self.button_play = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/play.png", self.play_video)
         self.button_play.pack(padx=5, side='left')
@@ -740,6 +832,7 @@ class MediaPlayer:
         self.media_player.release()
 
     def restric_inicial(self, *args):
+        """Funcion que permitew los loops en los videos esclavos"""
         try:
         
             if self._frame_actual.get() < self._frame_rango_inicial.get():
@@ -758,7 +851,7 @@ class MediaPlayer:
             pass
     
     def restric_final(self, *args):
-        
+        """Funcion que permitew los loops en los videos esclavos"""
         try:
             #print(self._frame_actual.get())
             #print(self._frame_rango_final.get())
@@ -778,7 +871,7 @@ class MediaPlayer:
             pass
     
     def borrar_segmentos(self):
-        """Permite borrar los segmentos ejecuntando un visualizador opencv"""
+        """Permite borrar los segmentos ejecutando un visualizador opencv"""
         try:
             estado_video_anterior = True if self.playing_video else False
             if self.playing_video:
@@ -790,6 +883,10 @@ class MediaPlayer:
             #lanzar vizualizer en modo 1 (borrador)
             self.visualizador.motrar_roi(1)
             self.visualizador.mostrarImagen(f"{self._path_temp + self._snapshot}.png")
+            
+            # Si estaba reproduciendo al cerrar va a volver a reproducir
+            if estado_video_anterior:
+                self.play_video()
         except:
             print("No fue posible lanzar el segmentador")
     
@@ -807,13 +904,11 @@ class MediaPlayer:
             #lanzar vizualizer en modo 2 (personaje)
             self.visualizador.motrar_roi(2)
             self.visualizador.mostrarImagen(f"{self._path_temp + self._snapshot}.png")
-
+        
             # Si estaba reproduciendo al cerrar va a volver a reproducir
             if estado_video_anterior:
                 self.play_video()
                 
-
-
         except:
             print("No fue posible lanzar el segmentador")
 
@@ -825,8 +920,11 @@ class MediaPlayer:
             if p.video_take_snapshot(0, file_name, 0, 0):
                 self.showerror(file_name)
 
-        
-            
+    def funcion1(self):
+        cont = 0
+        while cont < 100:
+            cont += 1
+            print("contador =", cont)  
             
 
 

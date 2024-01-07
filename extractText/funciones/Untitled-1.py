@@ -1,16 +1,4 @@
 
-import cv2
-import numpy as np
-
-image = None
-miArray = None
-
-start = False
-estado  = 0
-estado1 = 0
-p1, p2 = None, None
-p3, p4 = None, None
-list_puntos_difuminar = []
 '''
 def on_trackbar(value):
     pass
@@ -33,42 +21,6 @@ def on_mouse(event, x, y, flags, param):
         cv2.circle(param, pt, grosor, (0, 0, 0), -1)
 '''  
   
-
-def on_mouse(event, x, y, flags, param):
-    global estado, p3, p4, miArray
-    if event == cv2.EVENT_LBUTTONDBLCLK:
-        if estado == 0:
-            p3 = (x,y)
-            estado = 1
-        elif estado == 1:
-            p4 = (x,y)
-            estado = 0
-            miArray=cv2.rectangle(param, p3, p4, (0, 100, 0), -1)
-        
-            
-
-
-if __name__ == "__main__":
-    
-    title = 'Drawing'
-    image = cv2.imread("sources/temp/blob.png")
-    
-    cv2.namedWindow(title)
-    #cv2.createTrackbar('Grosor', title, 5, 50, on_trackbar) 
-    cv2.setMouseCallback(title, on_mouse, image)
-
-    while(1):
-        cv2.imshow(title, image)
-        if cv2.waitKey(20) & 0xFF == 27:
-            break
-        
-    cv2.destroyAllWindows()
-    print((miArray==image).all())
-    print(miArray == image)
-#joder = cv2.imread("sources/temp/Captura1.png")
-#cv2.imshow("JJJ", joder)
-#cv2.waitKey()
-#cv2.destroyAllWindows()
 
 
 """
@@ -97,50 +49,212 @@ thread2.start()
 thread1.join()
 thread2.join()
 """
-"""
-from multiprocessing import Process
+
+"""from multiprocessing import Process, Pipe
 import os
 import time
 
 
-contador = 1
+contador = 0
 
-def funcion1():
-    global contador
+def funcion1(tubo, contador):
     while 1:
         print("Hilo 1 trabajando")
         contador+=1
-        time.sleep(1)
+        time.sleep(0.2)
+        tubo.send(contador)
         if contador > 15:
             break
+    tubo.close()
 
         
-def funcion2():
-    global contador
-    
+def funcion2(tubo):
+    contador = 0
     while 1:
         print("Hilo 2 trabajando")
-        contador *=3
-        print("Contador=",contador)
+        print("Contador=",contador*2)
         time.sleep(1)
-        if contador > 400:
+        if contador >15:
             break
+        contador = tubo.recv()
+        
+    tubo.close()
 
 
 if __name__ == '__main__':
-    p = Process(target=funcion1, args=())
-    q = Process(target=funcion2, args=())
+    
+    tubo_praceso1, tubo_proceso2 = Pipe()
+    p = Process(target=funcion1, args=(tubo_praceso1, contador,))
+    q = Process(target=funcion2, args=(tubo_proceso2,))
     
     p.start()
     q.start()
     
-    
+    #print("contador al FINAL= ", tubo_proceso2.recv())
     p.join()
     q.join()
 
 
 
     print("Termino Todo")
-    print("contador= ", contador)
+  """
 
 """
+from multiprocessing import Process, Lock
+
+def f(l, i):
+    l.acquire()
+    try:
+        print('hello world', i)
+    finally:
+        l.release()
+
+if __name__ == '__main__':
+    lock = Lock()
+
+    for num in range(50):
+        Process(target=f, args=(lock, num)).start()
+"""
+
+
+"""from multiprocessing import Process, Value, Array
+
+def f(n, a):
+    n.value = 3.1415927
+    for i in range(len(a)):
+        a[i] = -a[i]
+
+if __name__ == '__main__':
+    num = Value('d', 0.0)
+    arr = Array('i', range(10))
+
+    p = Process(target=f, args=(num, arr))
+    p.start()
+    p.join()
+
+    print(num.value)
+    print(arr[:])
+"""
+'''
+import multiprocessing
+
+def worker(num):
+    """worker function"""
+    print('Worker', num)
+
+
+if __name__ == '__main__':
+    #jobs = []
+    for i in range(5):
+        p = multiprocessing.Process(target=worker, args=(i,))
+        #jobs.append(p)
+        p.start()
+    #print(jobs)
+'''
+from multiprocessing import Process, log_to_stderr, get_logger
+import time
+from tkinter import Tk
+from tkinter import ttk
+import logging
+import sys
+
+def item_selected(event):
+    print("Joder")
+    my_objeto = objeto()
+    button_eraser.config(command=lambda:my_objeto.lanzador(2))
+    button_marco.config(command=lambda:my_objeto.lanzador(1))
+    
+class objeto:
+
+    palabra = "Joider tio"
+    def __init__(self) -> None:
+        pass
+
+    def funcion1(self):
+        contador = 0
+        while 1:
+            contador += 1
+            print("Func1: ", contador, self.palabra)
+            time.sleep(0.1)
+            
+            if contador > 80:
+                break
+        
+        q = Process(target=self.funcion3)
+        q.start()
+        #q.join()
+    
+    def funcion2(self):
+        contador = 0
+        while 1:
+            contador += 2
+            print("Func2: ", contador)
+            time.sleep(0.2)
+            if contador > 120:
+                break
+    
+    def funcion3(self):
+        contador = 0
+        while 1:
+            contador += 2
+            print("Func3: ", contador)
+            time.sleep(0.02)
+            if contador > 200:
+                break
+    
+    def lanzador(self,mode):
+        log_to_stderr(logging.DEBUG)
+        logger = get_logger()
+        logger.setLevel(logging.INFO)
+
+        if mode == 1:
+            self.p = Process(target=self.funcion1)
+            self.p.start()
+        elif mode == 2:
+            self.p = Process(target=self.funcion2)
+            self.p.start()
+        
+    def unir(self):
+        self.p.join()
+        print("Salio")
+
+def iniciar_multis():
+    my_objeto = objeto()
+    my_objeto.lanzador(2)
+    my_objeto.lanzador(1)
+    #my_objeto.unir()
+
+
+#Ventana principal
+frame_root = Tk()
+
+#Configuraciones de la ventana
+frame_root.title("Sistema de Mineria TecnoBot")
+frame_root.geometry("1080x780")
+frame_root.config(bg='white')
+
+arbol = ttk.Treeview(frame_root)
+arbol.bind("<<TreeviewSelect>>", item_selected)
+arbol.pack(anchor='n',fill='both')
+arbol.insert("", 'end', text="Elemento 1")
+arbol.insert("", 'end', text="Elemento 2")
+arbol.insert("", 'end', text="Elemento 21")
+arbol.insert("", 'end', text="Elemento 22")
+arbol.insert("", 'end', text="Elemento 3")
+
+
+#button_eraser = ttk.Button(frame_root, text = "Borrador", command=lambda:my_objeto.lanzador(2))
+button_eraser = ttk.Button(frame_root, text = "Borrador")
+button_eraser.pack()
+#button_marco = ttk.Button(frame_root, text = "marco", command=lambda:my_objeto.lanzador(1))
+button_marco = ttk.Button(frame_root, text = "marco")
+button_marco.pack()
+
+
+
+if __name__ == '__main__':
+    
+    frame_root.mainloop()
+
+
+    
