@@ -7,7 +7,7 @@ from idlelib.tooltip import Hovertip
 from sympy import to_cnf #para la informacion de los botones
 from ttkwidgets import CheckboxTreeview
 
-from funciones.reproductor import MediaPlayer, objeto
+from funciones.reproductor import MediaPlayer
 
 reproductor_video = None
 
@@ -36,6 +36,12 @@ def item_selected(event):
     
     reproductor_video = MediaPlayer(ruta, frame_visualizer, frame_botones_procesar, spinInicio=inBox_inicio, spinFinal=inBox_fin, spinActual=inBox_Actual, mainVideo=True)
     reproductor_video.update_progres_video()
+    button_eraser.config(command=lambda:reproductor_video.lanzador(1))
+    button_selec_user.config(command=lambda:reproductor_video.lanzador(2))
+
+
+
+    
     
 
 

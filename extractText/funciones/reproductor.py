@@ -14,8 +14,8 @@ import time
 reader = easyocr.Reader(["es"], gpu = True)
 from tkinter import *
 from tkinter import ttk
-import multiprocessing as mp
-from multiprocessing import Process
+import threading
+
 
 
 class visualizador_video2:
@@ -41,6 +41,9 @@ class visualizador_video2:
     def __init__(self, ruta):
         self.tamanio_video = 0.5
         self.ruta = ruta
+    
+    def get_list_puntos_difuminar(self):
+        return self.list_puntos_difuminar
     
     def mostrarImagen(self, route):
         """
@@ -100,7 +103,7 @@ class visualizador_video2:
         #Iniciacion del video
         self.capture = cv2.VideoCapture(self.ruta)
         
-        while true:
+        while True:
             ret, img = self.capture.read()
             if not ret:
                 break
@@ -207,6 +210,7 @@ class visualizador_video2:
         if mode == 1:
             self.activar_Roi_on_person(False)
             self.activar_borrador(True)
+
         elif mode == 2:
             self.activar_borrador(False)
             self.activar_Roi_on_person(True)
@@ -214,8 +218,10 @@ class visualizador_video2:
         cv2.namedWindow(self.name_window)  
         # Introducir los callBack del mouse
         cv2.setMouseCallback(self.name_window, self.seleccionar_area)
+
     def limpiarImagen(self):
         self.imagen_general = self.imagen_respaldo.copy()
+
     def activar_borrador(self, value):
         """
         Activar o desactivar borrador
@@ -223,6 +229,7 @@ class visualizador_video2:
                       False. desactivar 
         """
         self._activate_borrador = True if value else False
+
     def activar_Roi_on_person(self, value):
         """
         Activar o desactivar ROI sobre el personaje principal a analizar
@@ -232,94 +239,10 @@ class visualizador_video2:
                       False. desactivar 
         """
         self._activate_roi_on_person = True if value else False
+    
+    
 
-class objeto:
-    
-    palabra = "Joider tio"
-    palabra2 = "mi mama me ama"
-    def __init__(self) -> None:
-        pass
 
-    def funcion1(self, colaOut):
-        contador = 0
-        while 1:
-            contador += 1
-            print("Func1: ", contador, self.palabra)
-            time.sleep(0.1)
-            
-            if contador > 80:
-                break
-        palabra = "La vida"
-        colaOut.put(palabra)
-        
-        #r = Process(target=self.funcion3, args=(colaSalida))
-        #r.start()
-        #r.join()
-        
-        
-        
-    
-    def funcion2(self, colaOut):
-        contador = 0
-        while 1:
-            contador += 2
-            print("Func2: ", contador, self.palabra2)
-            time.sleep(0.2)
-            if contador > 120:
-                break
-        palabra = "es maravillosa"
-        colaOut.put(palabra)
-        
-    
-    def funcion3(self, colaOut):
-        contador = 0
-        while 1:
-            contador += 2
-            print("Func3: ", contador)
-            time.sleep(0.02)
-            if contador > 200:
-                break
-        palabra = "KenJonathan"
-        colaOut.put(palabra)
-        
-    
-    def lanzador(self,mode):
-        
-        colaIn = mp.Queue()
-        
-        if mode == 1:
-            self.p = Process(target=self.funcion1, args=(colaIn,))
-            self.p.start()
-            
-        elif mode == 2:
-            self.p = Process(target=self.funcion2, args=(colaIn,))
-            self.p.start()
-            
-        frase = ""
-        self.p.join()
-        
-        
-        x = colaIn.get()
-        print(x)
-        
-        colaIn.close()
-
-        
-            
-        
-        #self.cola.close()
-        #self.cola.join_thread()
-        #frase += self.cola.get()
-        
-        #self.cola.close()
-        #self.cola.join_thread()
-        #self.q.join()
-        #self.p.join()
-        print(frase)
-        
-    def unir(self):
-        #self.p.join()
-        print("Salio")
 
 class Visualizador_Video:
 
@@ -593,9 +516,7 @@ class MediaPlayer:
         # Iniciar el reproductor de vista previa
         self.initialize_player(puntero_frame, self.ruta)
 
-        p = Process(target=self.funcion1)
-        p.start()
-        p.join()
+        
 
     def crear_widgets(self):
         self.button_play = BotonesControl(self.barra_de_progreso, "C:/Users/Usuario/Downloads/engine_controller_ls/extractText/app_sources/icons/play.png", self.play_video)
@@ -920,12 +841,16 @@ class MediaPlayer:
             if p.video_take_snapshot(0, file_name, 0, 0):
                 self.showerror(file_name)
 
-    def funcion1(self):
-        cont = 0
-        while cont < 100:
-            cont += 1
-            print("contador =", cont)  
-            
+    def lanzador(self, mode):
+        if mode == 1:
+            self.p = threading.Thread(target=self.borrar_segmentos())
+            self.p.start()
+        elif mode == 2:
+            self.p = threading.Thread(target=self.seleccionar_personaje())
+            self.p.start()
+        
+        self.p.join()
+
 
 
 

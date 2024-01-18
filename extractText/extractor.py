@@ -3,7 +3,7 @@ import easyocr
 
 import threading
 
-reader = easyocr.Reader(["es"], gpu=False)
+reader = easyocr.Reader(["es"], gpu=True)
 #captura = cv2.VideoCapture("../sources/Dictionary/personas/2.mp4")
 captura = cv2.VideoCapture("sources/Dictionary/personas/2.mp4")
 

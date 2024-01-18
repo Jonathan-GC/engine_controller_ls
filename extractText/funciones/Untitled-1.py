@@ -157,18 +157,25 @@ from tkinter import Tk
 from tkinter import ttk
 import logging
 import sys
+import vlc
+
 
 def item_selected(event):
     print("Joder")
     my_objeto = objeto()
     button_eraser.config(command=lambda:my_objeto.lanzador(2))
     button_marco.config(command=lambda:my_objeto.lanzador(1))
-    
+    my_objeto.start_player()
+
 class objeto:
 
-    palabra = "Joider tio"
     def __init__(self) -> None:
+        #self.start_player()
         pass
+    
+    def start_player(self):
+        self.vlc_instance = vlc.Instance()
+        
 
     def funcion1(self):
         contador = 0
@@ -218,11 +225,17 @@ class objeto:
         self.p.join()
         print("Salio")
 
+    def iniciar_multis(self):
+        self.lanzador(2)
+        self.lanzador(1)
+        #my_objeto.unir()
+"""
 def iniciar_multis():
     my_objeto = objeto()
     my_objeto.lanzador(2)
     my_objeto.lanzador(1)
     #my_objeto.unir()
+"""
 
 
 #Ventana principal
