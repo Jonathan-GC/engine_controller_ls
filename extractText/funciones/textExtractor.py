@@ -1,3 +1,4 @@
+from multiprocessing.reduction import duplicate
 from operator import index
 from tkinter import ttk
 import tkinter
@@ -8,6 +9,13 @@ import numpy as np
 import time
 
 class Extrator_texto:
+    
+    repositorio_palabras = []
+    storage_palabra = []
+    palabraAnterior = None
+    
+    objeto = ""
+
     def __init__(self, ruta = None, gpu = False) -> None:
         if gpu == False:
             self.salto_de_frames = 15
@@ -15,6 +23,7 @@ class Extrator_texto:
             self.salto_de_frames = 5
         self.reader = easyocr.Reader(["es"], gpu=gpu)
         self.cap= cv2.VideoCapture(ruta)
+
 
     def find_text(self, borrador = None):
         contador_frames = 0
@@ -25,27 +34,62 @@ class Extrator_texto:
                 break
             
             if borrador != None:
-                
+                #Sistema de Borrador
                 for puntos in borrador:
                     cv2.rectangle(imagen, puntos[0], puntos[1], (0, 255, 0), 2)
-                    #cv2.rectangle(imagen, (70, 54), (280, 170), (0, 255, 0), 2)
                     area_for_borrar = imagen[puntos[0][1]: puntos[1][1], puntos[0][0]: puntos[1][0]]
                     # Borrar area con un kernel de (31, 31)
                     area_for_borrar = cv2.blur(area_for_borrar, (31,31), cv2.BORDER_DEFAULT)
                     #Reemplazar esa areas por el nuevo
                     imagen[puntos[0][1]: puntos[1][1], puntos[0][0]: puntos[1][0]] = area_for_borrar
 
+            # Muestra de la imagen
             cv2.imshow("Imagen0", imagen)
+
+            # Analizara el texto cada fotograma dado
             if contador_frames % self.salto_de_frames == 0:
                 result = self.reader.readtext(imagen, paragraph=True, text_threshold=0.7 )
-                print(result)
+
+                
+                if len(result) > 0:
+                    
+
+                    try:                    
+                        if result[0][1] != "":
+                            self.palabraActual = result[0][1]
+
+                            if not self.palabraActual in self.repositorio_palabras:    
+                                if len(self.repositorio_palabras) > 1:
+                                    self.storage_palabra[-1][-1] = contador_frames 
+                                self.repositorio_palabras.append(self.palabraActual)
+                                self.storage_palabra.append([contador_frames, self.palabraActual, 0])
+                                
+                                
+                    except:
+                        pass
+
+       
+
+                    
+                    
+    
+
+                        
+                            
+            
+            
             if cv2.waitKey(1)==27:
                 break
+
+            # Avanzar el identificador de Frames
             contador_frames += 1
-            print("Frame: ", contador_frames)
+            
+
+
 
         self.cap.release()
         cv2.destroyAllWindows()
+        print(self.storage_palabra)
 
     
 class segmentoVideo:
@@ -62,7 +106,8 @@ class segmentoVideo:
             self.frame_inicial = frameInicio
     
     def get_palabra(self):
-        return palabra
+        pass
+        #return palabra
         
         
         
