@@ -8,6 +8,8 @@ from sympy import false
 import numpy as np
 import time
 
+# Libreria de Scikit-learn para similitud de vectores
+from scipy.spatial.distance import cosine
 class Extrator_texto:
     
     repositorio_palabras = []
@@ -48,7 +50,7 @@ class Extrator_texto:
 
             # Analizara el texto cada fotograma dado
             if contador_frames % self.salto_de_frames == 0:
-                result = self.reader.readtext(imagen, paragraph=True, text_threshold=0.7 )
+                result = self.reader.readtext(imagen, paragraph=True, text_threshold=0.8, batch_size=2)
 
                 
                 if len(result) > 0:
@@ -57,7 +59,8 @@ class Extrator_texto:
                     try:                    
                         if result[0][1] != "":
                             self.palabraActual = result[0][1]
-
+                            self.palabraActual = self.normalize(self.palabraActual)
+                            
                             if not self.palabraActual in self.repositorio_palabras:    
                                 if len(self.repositorio_palabras) > 1:
                                     self.storage_palabra[-1][-1] = contador_frames 
@@ -68,28 +71,40 @@ class Extrator_texto:
                     except:
                         pass
 
-       
-
-                    
-                    
-    
-
-                        
-                            
-            
-            
             if cv2.waitKey(1)==27:
                 break
 
             # Avanzar el identificador de Frames
             contador_frames += 1
             
-
-
-
         self.cap.release()
         cv2.destroyAllWindows()
         print(self.storage_palabra)
+
+    def normalize(self, cadena):
+        """Modulo para eliminar tildes de cada palabra"""
+        replacements = (
+            ("á", "a"),
+            ("é", "e"),
+            ("í", "i"),
+            ("ó", "o"),
+            ("ú", "u"),
+        )
+
+        for a, b in replacements:
+            cadena = cadena.replace(a, b).replace(a.upper(), b.upper())
+        
+        return cadena
+
+    def simulitud_de_palabras(texto_in_1, texto_in_2 ):
+        x = [ord(letra) for letra in texto_in_1]
+        y = [ord(letra) for letra in texto_in_2]
+        a = np.array(x)
+        b = np.array(y)
+        print("coseno de vectores: ", cosine(a, b))
+
+
+
 
     
 class segmentoVideo:

@@ -677,6 +677,8 @@ class MediaPlayer:
             self.media_player.play()
             self.playing_video = True
             self._pausing_video=False
+            # Bajar el volumen del video
+            self.media_player.audio_set_volume(1)
             self.update_progres_video()
 
     def pause_video(self):
