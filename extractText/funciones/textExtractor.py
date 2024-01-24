@@ -1,5 +1,6 @@
 from multiprocessing.reduction import duplicate
 from operator import index
+from sys import exception
 from tkinter import ttk
 import tkinter
 import cv2
@@ -10,8 +11,9 @@ import time
 
 # Libreria de Scikit-learn para similitud de vectores
 from scipy.spatial.distance import cosine
+from torch import randint
 class Extrator_texto:
-    
+    aperturador_de_frase = False
     repositorio_palabras = []
     storage_palabra = []
     palabraAnterior = None
@@ -29,6 +31,7 @@ class Extrator_texto:
 
     def find_text(self, borrador = None):
         contador_frames = 0
+        aperturador_de_frase = False
         while self.cap.isOpened():
             ret, imagen = self.cap.read()
 
@@ -52,24 +55,72 @@ class Extrator_texto:
             if contador_frames % self.salto_de_frames == 0:
                 result = self.reader.readtext(imagen, paragraph=True, text_threshold=0.8, batch_size=2)
 
-                
+                # Apertura del candado de frase
                 if len(result) > 0:
-                    
-
+                    # Abrir el candado
+                    aperturador_de_frase = True
                     try:                    
                         if result[0][1] != "":
+                            #Extraer la palabra
                             self.palabraActual = result[0][1]
+
+                            #Normalizar la palabra para evitar tildes
                             self.palabraActual = self.normalize(self.palabraActual)
+                            
+                            # Averiguar si ya hay una palabra similar, si la hay no la almacena y continua
+                            if self.repositorio_palabras:
+                                
+                                if len(self.palabraActual) == len(self.repositorio_palabras[-1]):
+                                    #Antes de agregar calcula< si la palabra es similar a otra
+                                    if self.simulitud_de_palabras(self.palabraActual, self.repositorio_palabras[-1]) > 0.03:
+                                        # Agregar palabra a los resultados
+                                        self.storage_palabra.append([contador_frames, self.palabraActual, 0])
+
+                                elif len(self.palabraActual) + 2 > len(self.repositorio_palabras[-1]):
+                                    # si es mas grande, elimine un caracteres aleatorios
+                                    # no mas que el tamaño de la lista mas pequeña y calcule similitud.
+                                    #if self.simulitud_de_palabras(self.palabraActual, self.repositorio_palabras[-1], igualarVectores=True) > 0.0165:
+                                    #    self.storage_palabra.append([contador_frames, self.palabraActual, 0])
+                                    pass
+                                #elif len(self.palabraActual) - 2 < len(self.repositorio_palabras[-1]):
+                                    # si es mas pequeño, elimine uno caracteres aleatorios
+                                    # no mas que el tamaño de la lista mas pequeña y calcule similitud.
+                                    #if self.simulitud_de_palabras(self.palabraActual, self.repositorio_palabras[-1], igualarVectores=True) > 0.0165:
+                                    #    self.storage_palabra.append([contador_frames, self.palabraActual, 0])
+                                #    pass
+
+                                else:
+                                    # cuando la palabra es diferente en todo sentido se agrega y se actualiza el repositorio de palabras
+                                    self.storage_palabra.append([contador_frames, self.palabraActual, 0])
+                                    self.repositorio_palabras.append(self.palabraActual) 
+                                
+                            else:
+                                self.storage_palabra.append([contador_frames, self.palabraActual, 0])
+                                self.repositorio_palabras.append(self.palabraActual)
+                            
+
+
+                            """
+                            
+                            
                             
                             if not self.palabraActual in self.repositorio_palabras:    
                                 if len(self.repositorio_palabras) > 1:
                                     self.storage_palabra[-1][-1] = contador_frames 
                                 self.repositorio_palabras.append(self.palabraActual)
                                 self.storage_palabra.append([contador_frames, self.palabraActual, 0])
-                                
-                                
-                    except:
-                        pass
+                            """  
+                    except Exception as error:
+                        print(error)
+
+                else:
+                    if self.aperturador_de_frase:
+                        self.storage_palabra[-1][-1] = contador_frames
+                        # Apertura del candado de frase
+                        aperturador_de_frase = False
+                    
+
+                    
 
             if cv2.waitKey(1)==27:
                 break
@@ -89,6 +140,7 @@ class Extrator_texto:
             ("í", "i"),
             ("ó", "o"),
             ("ú", "u"),
+            (" ", ""),
         )
 
         for a, b in replacements:
@@ -96,12 +148,36 @@ class Extrator_texto:
         
         return cadena
 
-    def simulitud_de_palabras(texto_in_1, texto_in_2 ):
+    def simulitud_de_palabras(self, texto_in_1, texto_in_2, igualarVectores = False, caracteres_para_eliminar = 0):
+        """
+        Convierte las cadenas en ordinales para ser analizadas como numeros
+        Se aplica el coseno para conocer que tan  similares son las dos cadenas
+        las pruebas experimentales muestras 
+
+        coseno "mi cadena", "mi cadena" = 0 : Similitud exacta
+        coseno "mi caneca", "mi cadena" = 0.0013031388355694284 : palabras vecxtorialmente similares
+        coseno "mi cadena", "la novena" = 0.0031400294279362306 : palabras vectorialmente mas alejadas
+        """
+        
         x = [ord(letra) for letra in texto_in_1]
         y = [ord(letra) for letra in texto_in_2]
+
+        if len(x) > len(y):
+            import random
+            for i in range(len(x) - len(y)):
+                x.pop(random.randint(0, len(x) - len(y)))
+        elif len(y) > len(x):
+            import random
+            for i in range(len(y) - len(x)):
+                y.pop(random.randint(0, len(y) - len(x)))
+
+
+            
         a = np.array(x)
         b = np.array(y)
-        print("coseno de vectores: ", cosine(a, b))
+        #print("coseno de vectores: ", cosine(a, b))
+        return cosine(a, b)
+        
 
 
 
