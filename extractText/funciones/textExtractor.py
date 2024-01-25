@@ -66,7 +66,7 @@ class Extrator_texto:
 
                             #Normalizar la palabra para evitar tildes
                             self.palabraActual = self.normalize(self.palabraActual)
-                            
+                            print(self.palabraActual)
                             # Averiguar si ya hay una palabra similar, si la hay no la almacena y continua
                             if self.repositorio_palabras:
                                 
@@ -76,25 +76,33 @@ class Extrator_texto:
                                         # Agregar palabra a los resultados
                                         self.storage_palabra.append([contador_frames, self.palabraActual, 0])
 
-                                elif len(self.palabraActual) + 2 > len(self.repositorio_palabras[-1]):
+                                elif len(self.palabraActual)>len(self.repositorio_palabras[-1]):
                                     # si es mas grande, elimine un caracteres aleatorios
                                     # no mas que el tamaño de la lista mas pequeña y calcule similitud.
-                                    #if self.simulitud_de_palabras(self.palabraActual, self.repositorio_palabras[-1], igualarVectores=True) > 0.0165:
-                                    #    self.storage_palabra.append([contador_frames, self.palabraActual, 0])
-                                    pass
-                                #elif len(self.palabraActual) - 2 < len(self.repositorio_palabras[-1]):
-                                    # si es mas pequeño, elimine uno caracteres aleatorios
-                                    # no mas que el tamaño de la lista mas pequeña y calcule similitud.
-                                    #if self.simulitud_de_palabras(self.palabraActual, self.repositorio_palabras[-1], igualarVectores=True) > 0.0165:
-                                    #    self.storage_palabra.append([contador_frames, self.palabraActual, 0])
-                                #    pass
+                                    if self.simulitud_de_palabras(self.palabraActual, self.storage_palabra[-1][-2], igualarVectores=True) > 0.03:
+                                        # a la palabra anterior coloquele el fin del frame
+                                        self.storage_palabra[-1][-1] = contador_frames
+                                        self.storage_palabra.append([contador_frames, self.palabraActual, 0])
+                                        self.repositorio_palabras.append(self.palabraActual)
+                                    # Añada los elementos
+                                    #self.storage_palabra.append([contador_frames, self.palabraActual, 0])
+                                    
+                                    #self.repositorio_palabras.append(self.palabraActual)
+                                elif len(self.palabraActual) < len(self.repositorio_palabras[-1]):
+                                    if self.simulitud_de_palabras(self.palabraActual, self.storage_palabra[-1][-2], igualarVectores=True) > 0.03:
+                                        # a la palabra anterior coloquele el fin del frame
+                                        self.storage_palabra[-1][-1] = contador_frames
+                                        self.storage_palabra.append([contador_frames, self.palabraActual, 0])
+                                        self.repositorio_palabras.append(self.palabraActual)
+
 
                                 else:
                                     # cuando la palabra es diferente en todo sentido se agrega y se actualiza el repositorio de palabras
                                     self.storage_palabra.append([contador_frames, self.palabraActual, 0])
-                                    self.repositorio_palabras.append(self.palabraActual) 
+                                    self.repositorio_palabras.append(self.palabraActual)
                                 
                             else:
+                                #Corresponde a la primera entrada, cuando no hay nada en el Array
                                 self.storage_palabra.append([contador_frames, self.palabraActual, 0])
                                 self.repositorio_palabras.append(self.palabraActual)
                             
@@ -112,12 +120,6 @@ class Extrator_texto:
                             """  
                     except Exception as error:
                         print(error)
-
-                else:
-                    if self.aperturador_de_frase:
-                        self.storage_palabra[-1][-1] = contador_frames
-                        # Apertura del candado de frase
-                        aperturador_de_frase = False
                     
 
                     
@@ -130,7 +132,8 @@ class Extrator_texto:
             
         self.cap.release()
         cv2.destroyAllWindows()
-        print(self.storage_palabra)
+        for element in self.storage_palabra:
+            print(element)
 
     def normalize(self, cadena):
         """Modulo para eliminar tildes de cada palabra"""
@@ -140,7 +143,7 @@ class Extrator_texto:
             ("í", "i"),
             ("ó", "o"),
             ("ú", "u"),
-            (" ", ""),
+            #(" ", ""),
         )
 
         for a, b in replacements:
