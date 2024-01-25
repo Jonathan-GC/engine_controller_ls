@@ -72,14 +72,15 @@ class Extrator_texto:
                                 
                                 if len(self.palabraActual) == len(self.repositorio_palabras[-1]):
                                     #Antes de agregar calcula< si la palabra es similar a otra
-                                    if self.simulitud_de_palabras(self.palabraActual, self.repositorio_palabras[-1]) > 0.03:
+                                    if self.simulitud_de_palabras(self.palabraActual, self.repositorio_palabras[-1]) > 0.3:
                                         # Agregar palabra a los resultados
                                         self.storage_palabra.append([contador_frames, self.palabraActual, 0])
 
-                                elif len(self.palabraActual)>len(self.repositorio_palabras[-1]):
+                                elif len(self.palabraActual) - len(self.repositorio_palabras[-1]) > 0 and len(self.palabraActual) - len(self.repositorio_palabras[-1]) <= 2:
+                                    print("entroa la 1ra")
                                     # si es mas grande, elimine un caracteres aleatorios
                                     # no mas que el tamaño de la lista mas pequeña y calcule similitud.
-                                    if self.simulitud_de_palabras(self.palabraActual, self.storage_palabra[-1][-2], igualarVectores=True) > 0.03:
+                                    if self.simulitud_de_palabras(self.palabraActual, self.storage_palabra[-1][-2], igualarVectores=True) > 0.5:
                                         # a la palabra anterior coloquele el fin del frame
                                         self.storage_palabra[-1][-1] = contador_frames
                                         self.storage_palabra.append([contador_frames, self.palabraActual, 0])
@@ -88,8 +89,9 @@ class Extrator_texto:
                                     #self.storage_palabra.append([contador_frames, self.palabraActual, 0])
                                     
                                     #self.repositorio_palabras.append(self.palabraActual)
-                                elif len(self.palabraActual) < len(self.repositorio_palabras[-1]):
-                                    if self.simulitud_de_palabras(self.palabraActual, self.storage_palabra[-1][-2], igualarVectores=True) > 0.03:
+                                elif len(self.palabraActual) - len(self.repositorio_palabras[-1]) >= -2 and len(self.palabraActual) - len(self.repositorio_palabras[-1]) < 0:
+                                    print("entroa la 2da")
+                                    if self.simulitud_de_palabras(self.palabraActual, self.storage_palabra[-1][-2], igualarVectores=True) > 0.5:
                                         # a la palabra anterior coloquele el fin del frame
                                         self.storage_palabra[-1][-1] = contador_frames
                                         self.storage_palabra.append([contador_frames, self.palabraActual, 0])
@@ -97,7 +99,10 @@ class Extrator_texto:
 
 
                                 else:
+                                    print("entroa la 3ra")
                                     # cuando la palabra es diferente en todo sentido se agrega y se actualiza el repositorio de palabras
+                                    # a la palabra anterior coloquele el fin del frame
+                                    self.storage_palabra[-1][-1] = contador_frames
                                     self.storage_palabra.append([contador_frames, self.palabraActual, 0])
                                     self.repositorio_palabras.append(self.palabraActual)
                                 
