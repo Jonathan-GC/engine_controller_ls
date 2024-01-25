@@ -62,8 +62,8 @@ calcular_similitud(1, 3)
 calcular_similitud(2, 3)
 
 
-frase1 = "quierodecirtequeunadelasformasmasicomunes@s@ecitrgdfdsfgd"
-frase2 = "quierodecirtequeunadelasformasmasicomunes@s@eci"
+frase1 = "feliz"
+frase2 = "dia"
 x = [ord(letra) for letra in frase1]
 y = [ord(letra) for letra in frase2]
 
@@ -77,3 +77,9 @@ elif len(y) > len(x):
         y.pop(random.randint(0, len(y) - len(x)))
 
 print(len(x), len(y))
+
+a = np.array(x)
+b = np.array(y)
+
+from scipy.spatial.distance import cosine
+print("coseno de vectores: ", cosine(a, b))
