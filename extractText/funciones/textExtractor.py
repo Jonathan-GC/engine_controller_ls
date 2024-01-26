@@ -81,7 +81,7 @@ class Extrator_texto:
                                         self._agregar_palabra(contador_frames)
 
                                 elif size_word_actual - size_word_backward > 0 and size_word_actual - size_word_backward <= 2:
-                                    print("Entroooo 1")
+                                    
                                     # si es mas grande, elimine un caracteres aleatorios
                                     # no mas que el tamaño de la lista mas pequeña y calcule similitud.
                                     if self.simulitud_de_palabras(self.palabraActual, self.repositorio_palabras[-1], igualarVectores=True) > 0.0045:
@@ -89,13 +89,13 @@ class Extrator_texto:
                                         self._agregar_palabra(contador_frames)
                                     
                                 elif size_word_actual - size_word_backward >= -2 and size_word_actual - size_word_backward < 0:
-                                    print("Entroooo 2")
+                                    
                                     if self.simulitud_de_palabras(self.palabraActual, self.repositorio_palabras[-1], igualarVectores=True) > 0.0045:
                                         self._agregar_palabra(contador_frames)
 
 
                                 else:
-                                    print("Entroooo 3")
+                                    
                                     # cuando la palabra es diferente en todo sentido se agrega y se actualiza el repositorio de palabras
                                     self._agregar_palabra(contador_frames)
 
@@ -121,6 +121,9 @@ class Extrator_texto:
         cv2.destroyAllWindows()
         for element in self.storage_palabra:
             print(element)
+
+
+
 
     def normalize(self, cadena):
         """Modulo para eliminar tildes de cada palabra"""
