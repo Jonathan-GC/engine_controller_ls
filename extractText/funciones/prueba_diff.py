@@ -1,4 +1,4 @@
-from ast import For
+from ast import For, List
 from difflib import SequenceMatcher
 
 from sympy import Segment
@@ -68,11 +68,16 @@ for i, segmento in enumerate(LISTA):
     print(i, a, frase, b)
     palabras.append(frase)
 
+NuevaListaFiltrada = []
 K = encontrar_similares(palabras)
+for i, palabras in enumerate(K):
+    mi_lista = []
+    for j in range(len(palabras)):
+        mi_lista.append(LISTA[j])
+#    NuevaListaFiltrada.append([LISTA[j][0], palabras[0], ])
 
-print(K)
 
 # Crear una lista más simple
 lista_simple = [grupo[0] for grupo in K]
+
 print(lista_simple)
-        

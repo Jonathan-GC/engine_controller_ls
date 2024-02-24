@@ -1,0 +1,153 @@
+[15, 'Bueno para respondera esta pregunta', 60], 
+[60, 'quiero decirte que unade las formas mas comuneses decir', 70], 
+[70, 'quiero decirte que una de las formas mas comunesles decir', 0], 
+[85, 'quiero decirte que unade las formas mas comunes es decir', 0], 
+[110, 'quiero decirteque una de las formasmas comunes @s decir', 0], 
+[115, 'quiero decirtequeuna de lasformas masicomunes @s @ecir', 0], 
+[125, 'quiero decirtequeuna de lasformas mascomunes es @ecir', 0], 
+[130, 'quiero decirtequeunade lasformas mascomunes es decir', 0], 
+[155, 'feliz dia', 0], 
+[165, 'felizdia', 0], 
+[235, 'FELIZ', 0], 
+[290, 'DiA', 0]]
+
+[15, 'Bueno para respondera esta pregunta', 60]
+[60, 'quiero decirte que unade las formas mas comuneses decir', 70]
+[70, 'quiero decirte que una de las formas mas comunesles decir', 85]
+[85, 'quiero decirte que unade las formas mas comunes es decir', 110]
+[110, 'quiero decirteque una de las formasmas comunes @s decir', 125]
+[125, 'quiero decirtequeuna de lasformas mascomunes es @ecir', 140]
+[140, 'quiero decirteque una de lasformas mas comunes @s @ecir', 150]
+[150, 'quiero decirte que una de las formas mas comunes es decir', 155]
+[155, 'feliz dia', 165]
+[165, 'felizdia', 705]
+[705, 'espero te sirva:', 0]
+
+
+[15, 'Bueno para respondera esta pregunta', 0]
+[60, 'quiero decirte que unade las formas mas comuneses decir', 70]
+[70, 'quiero decirte que una de las formas mas comunesles decir', 85]
+[85, 'quiero decirte que unade las formas mas comunes es decir', 90]
+[90, 'quiero decirte que una de las formas mas comunes es decir', 95]
+[95, 'quiero decirte que unade las formas mas comunes es decir', 105]
+[105, 'quiero decirte que una de las-formas mas comunes es decir', 110]
+[110, 'quiero decirteque una de las formasmas comunes @s decir', 115]
+[115, 'quiero decirtequeuna de lasformas masicomunes @s @ecir', 125]
+[125, 'quiero decirtequeuna de lasformas mascomunes es @ecir', 140]
+[140, 'quiero decirteque una de lasformas mas comunes @s @ecir', 150]
+[150, 'quiero decirte que una de las formas mas comunes es decir', 0]
+[155, 'feliz dia', 165]
+[165, 'felizdia', 0]
+[195, 'yesdeesta manera', 0]
+[235, 'FELIZ', 290]
+[290, 'DiA', 0]
+[700, 'espero te sirvas', 0]
+
+
+
+
+
+[15, 'Bueno para respondera esta pregunta', 0]
+[60, 'quiero decirte que unade las formas mas comuneses decir', 70]
+[70, 'quiero decirte que una de las formas mas comunesles decir', 85]
+[85, 'quiero decirte que unade las formas mas comunes es decir', 110]
+[110, 'quiero decirteque una de las formasmas comunes @s decir', 115]
+[115, 'quiero decirtequeuna de lasformas masicomunes @s @ecir', 125]
+[125, 'quiero decirtequeuna de lasformas mascomunes es @ecir', 0]
+[150, 'quiero decirte que una de las formas mas comunes es decir', 0]
+[155, 'feliz dia', 165]
+[165, 'felizdia', 0]
+[195, 'yesdeesta manera', 0]
+[235, 'FELIZ', 290]
+[290, 'DiA', 0]
+[700, 'espero te sirvas', 0]
+
+
+
+
+
+
+[15, 'Bueno para respondera esta pregunta', 0]
+[60, 'quiero decirte que unade las formas mas comuneses decir', 115]
+[115, 'quiero decirtequeuna de lasformas masicomunes @s @ecir', 125]
+[125, 'quiero decirtequeuna de lasformas mascomunes es @ecir', 0]
+[150, 'quiero decirte que una de las formas mas comunes es decir', 0]
+[155, 'feliz dia', 165]
+[165, 'felizdia', 0]
+[195, 'yesdeesta manera', 0]
+[235, 'FELIZ', 290]
+[290, 'DiA', 0]
+[700, 'espero te sirvas', 0]
+
+
+
+
+
+
+
+
+
+[15, 'Bueno para respondera esta pregunta', 60]
+[60, 'quiero decirte que unade las formas mas comuneses decir', 115]
+[115, 'quiero decirtequeuna de lasformas masicomunes @s @ecir', 125]
+[125, 'quiero decirtequeuna de lasformas mascomunes es @ecir', 150]
+[150, 'quiero decirte que una de las formas mas comunes es decir', 155]
+[155, 'feliz dia', 165]
+[165, 'felizdia', 195]
+[195, 'yesdeesta manera', 235]
+[235, 'FELIZ', 290]
+[290, 'DiA', 700]
+[700, 'espero te sirvas', 0]
+
+
+
+
+[15, 'Bueno para respondera esta pregunta', 60]
+[60, 'quiero decirte que unade las formas mas comuneses decir', 115]
+[115, 'quiero decirtequeuna de lasformas masicomunes @s @ecir', 125]
+[125, 'quiero decirtequeuna de lasformas mascomunes es @ecir', 150]
+[150, 'quiero decirte que una de las formas mas comunes es decir', 155]
+[155, 'feliz dia', 165]
+[165, 'felizdia', 195]
+[195, 'yesdeesta manera', 235]
+[235, 'FELIZ', 290]
+[290, 'DiA', 700]
+[700, 'espero te sirvas', 0]
+
+
+
+
+[15, 'Bueno para respondera esta pregunta', 60]
+[60, 'quiero decirte que unade las formas mas comuneses decir', 130]
+[130, 'quiero decirtequeunade lasformas mascomunes es decir', 140]
+[140, 'quiero decirteque una de lasformas mas comunes @s @ecir', 155]
+[155, 'feliz dia', 195]
+[195, 'yesdeesta manera', 235]
+[235, 'FELIZ', 700]
+[700, 'espero te sirvas', 0]
+
+
+[15, 'Bueno para respondera esta pregunta', 55]
+[60, 'quiero decirte que unade las formas mas comuneses decir', 65]
+[70, 'quiero decirte que una de las formas mas comunesles decir', 80]
+[85, 'quiero decirte que unade las formas mas comunes es decir', 85]
+[90, 'quiero decirte que una de las formas mas comunes es decir', 90]
+[95, 'quiero decirte que unade las formas mas comunes es decir', 100]
+[105, 'quiero decirte que una de las-formas mas comunes es decir', 105]
+[110, 'quiero decirteque una de las formasmas comunes es decir', 110]
+[115, 'quiero decirtequeuna de lasformas masicomunes es eecir', 120]
+[125, 'quiero decirtequeuna de lasformas mascomunes es eecir', 125]
+[130, 'quiero decirtequeunade lasformas mascomunes es decir', 130]
+[135, 'quiero decirte quuna de lasformas mascomunes es eecir', 135]
+[140, 'quiero decirteque una de lasformas mas comunes es eecir', 145]
+[150, 'quiero decirte que una de las formas mas comunes es decir', 150]
+[155, 'feliz dia', 160]
+[165, 'felizdia', 190]
+[195, 'yesdeesta manera', 200]
+[205, 'yes deesta manera', 205]
+[210, 'yesdeesta manera', 210]
+[215, 'yesdeestamanera', 215]
+[220, 'yesdeesta manera', 230]
+[235, 'FELIZ', 285]
+[290, 'DiA', 695]
+[700, 'espero te sirvas', 0]

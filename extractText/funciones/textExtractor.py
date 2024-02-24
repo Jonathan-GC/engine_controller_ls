@@ -238,7 +238,7 @@ if __name__ == "__main__":
     boton_buscar_text.pack()
 
     reproductor = MediaPlayer("sources/feliz-2.mp4", display, frame_to_barra, spinInicio=inBox_inicio, spinFinal=inBox_fin, spinActual=inBox_Actual, mainVideo=False)
-    lector=Extrator_texto(ruta="sources/feliz-2.mp4", gpu=True)
+    lector=Extrator_texto(ruta="sources/feliz-2.mp4", gpu=False)
     boton_buscar_text.config(command=lambda: lector.find_text([[(70, 54), (280, 170)], [(70, 70), (280, 170)]]))
 
 
